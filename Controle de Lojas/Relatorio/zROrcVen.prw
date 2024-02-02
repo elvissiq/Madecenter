@@ -269,8 +269,7 @@ Static Function fMontaRel(oProc)
 			cQryIte += "    L2_VLRITEM, "                                         + CRLF
 			cQryIte += "    L2_VALIPI, "                                          + CRLF
 			cQryIte += "    L2_VALDESC, "                                         + CRLF
-			cQryIte += "    SB5.B5_QE1, "                                         + CRLF 
-			cQryIte += "    DA1.DA1_XPRCM2"                                       + CRLF 
+			cQryIte += "    SB5.B5_QE1 "                                          + CRLF 
 			cQryIte += " FROM "                                                   + CRLF
 			cQryIte += "    "+RetSQLName("SL2")+" SL2 "                           + CRLF
 			cQryIte += "    LEFT JOIN "+RetSQLName("SB1")+" SB1 ON ( "            + CRLF
@@ -324,7 +323,6 @@ Static Function fMontaRel(oProc)
 				nVUnTot  += QRY_ITE->L2_PRCTAB
 				nQdtTot2 += nQdt2UM
 				nPacTot  += QRY_ITE->L2_QUANT / QRY_ITE->B5_QE1
-				nVM2Tot  += QRY_ITE->DA1_XPRCM2
 				nIPITot  += QRY_ITE->L2_VALIPI
 			
 				nValorTot += (QRY_ITE->L2_PRCTAB * QRY_ITE->L2_QUANT) + QRY_ITE->L2_VALIPI
@@ -337,10 +335,7 @@ Static Function fMontaRel(oProc)
 				oPrintPvt:SayAlign(nLinAtu, nPosVUni,  Alltrim(Transform(QRY_ITE->L2_PRCTAB, cMaskPrc)),  oFontDet, 100, 07, , nPadLeft,)
 				oPrintPvt:SayAlign(nLinAtu, nPosUnid2, QRY_ITE->L2_SEGUM,                                 oFontDet, 100, 07, , nPadLeft,)
 				oPrintPvt:SayAlign(nLinAtu, nPosQuan2, Alltrim(Transform(nQdt2UM, cMaskQtd)),             oFontDet, 100, 07, , nPadLeft,)
-				oPrintPvt:SayAlign(nLinAtu, nPosVM2,   Alltrim(Transform(QRY_ITE->DA1_XPRCM2, cMaskPrc)), oFontDet, 100, 07, , nPadLeft,)
-				oPrintPvt:SayAlign(nLinAtu, nPosIPI,   Alltrim(Transform(QRY_ITE->L2_VALIPI, cMaskPrc)),  oFontDet, 100, 07, , nPadLeft,)
 				oPrintPvt:SayAlign(nLinAtu, nPosVTot,  Alltrim(Transform(((QRY_ITE->L2_PRCTAB * QRY_ITE->L2_QUANT) + QRY_ITE->L2_VALIPI), cMaskVlr)), oFontDet, 100, 07, , nPadLeft,)
-				oPrintPvt:SayAlign(nLinAtu, nPosPacot, Alltrim(Transform((QRY_ITE->L2_QUANT / QRY_ITE->B5_QE1), cMaskQtd)),oFontDet, 100, 07, , nPadLeft,)
 				nLinAtu += 10
 
 				//Se por acaso atingiu o limite da Pagina, finaliza, e começa uma nova Pagina
@@ -468,8 +463,8 @@ Static Function fImpCab()
 	oPrintPvt:SayAlign(nLinCab,    nColIni+5,  "Cliente:",                                  oFontCabN, 200, 07, , nPadLeft, )
 	oPrintPvt:SayAlign(nLinCab,    nColIni+40, cCliAux,                                     oFontCab, 500, 07, , nPadLeft, )
 	nLinCab += 010
-	oPrintPvt:SayAlign(nLinCab,    nColIni+5,  "Nome Fantasia:",                            oFontCabN, 200, 07, , nPadLeft, )
-	oPrintPvt:SayAlign(nLinCab,    nColIni+70, QRY_PED->A1_NREDUZ,  	                    oFontCab, 500, 07, , nPadLeft, )
+	oPrintPvt:SayAlign(nLinCab,    nColIni+5,  "Nome Fantasia: ",                           oFontCabN, 200, 07, , nPadLeft, )
+	oPrintPvt:SayAlign(nLinCab,    nColIni+70, QRY_PED->A1_NREDUZ,     	                    oFontCab, 500, 07, , nPadLeft, )
 	nLinCab += 010
 	cCGC := QRY_PED->A1_CGC
 	If lCNPJ
@@ -527,10 +522,7 @@ Static Function fImpCab()
 	oPrintPvt:SayAlign(nLinCab, nPosVUni,  "Vl. Unit.", oFontDetN, 200, 07,, nPadLeft,)
 	oPrintPvt:SayAlign(nLinCab, nPosUnid2, "2ª UM",     oFontDetN, 200, 07,, nPadLeft,)
 	oPrintPvt:SayAlign(nLinCab, nPosQuan2, "Qtd. 2ª",	oFontDetN, 200, 07,, nPadLeft,)
-	oPrintPvt:SayAlign(nLinCab, nPosVM2,   "Vl. M2",    oFontDetN, 200, 07,, nPadLeft,)
-	oPrintPvt:SayAlign(nLinCab, nPosIPI,   "IPI",	    oFontDetN, 200, 07,, nPadLeft,)
 	oPrintPvt:SayAlign(nLinCab, nPosVTot,  "Vl.Total",  oFontDetN, 200, 07,, nPadLeft,)
-	oPrintPvt:SayAlign(nLinCab, nPosPacot, "Pacotes",   oFontDetN, 200, 07,, nPadLeft,)
 	
 	//Atualizando a linha inicial do relatorio
 	nLinAtu := nLinCab + 020
@@ -625,10 +617,7 @@ Static Function fImpTot()
 	oPrintPvt:SayAlign(nLinAtu, nPosQuan, 	Alltrim(Transform(nQdtTot, cMaskQtd)),  oFontCabN, 080, 07, , nPadLeft, )
 	oPrintPvt:SayAlign(nLinAtu, nPosQuan2, 	Alltrim(Transform(nQdtTot2, cMaskQtd)), oFontCabN, 080, 07, , nPadLeft, )
 	oPrintPvt:SayAlign(nLinAtu, nPosVUni, 	Alltrim(Transform(nVUnTot, cMaskPrc)),  oFontCabN, 080, 07, , nPadLeft, )
-	oPrintPvt:SayAlign(nLinAtu, nPosVM2, 	Alltrim(Transform(nVM2Tot, cMaskPrc)),  oFontCabN, 080, 07, , nPadLeft, )
-	oPrintPvt:SayAlign(nLinAtu, nPosIPI, 	Alltrim(Transform(nIPITot, cMaskPrc)),  oFontCabN, 080, 07, , nPadLeft, )
 	oPrintPvt:SayAlign(nLinAtu, nPosVTot, 	Alltrim(Transform(nValorTot, cMaskVlr)),oFontCabN, 080, 07, , nPadLeft, )
-	oPrintPvt:SayAlign(nLinAtu, nPosPacot, 	Alltrim(Transform(nPacTot, cMaskVlr)),  oFontCabN, 080, 07, , nPadLeft, )
 
 	nLinAtu += 015
 
@@ -798,13 +787,6 @@ Local nId       := 0
 	nLinAtu += 010
 	oPrintPvt:SayAlign(nLinAtu, nColIni, "após sua emissão, estarão sujeitas a alteração de preço de acordo com a cotação do dia.",    		 	oFontObs,  540, 07, , nPadCenter, )
 	nLinAtu += 015
-	
-	oPrintPvt:SayAlign(nLinAtu, nColIni, "LOGISTICA DE TROCA: SOMENTE POR DEFEITO DE FABRICAÇÃO!",    oFontObsN,  540, 07, , nPadCenter, )
-	nLinAtu += 010
-	oPrintPvt:SayAlign(nLinAtu, nColIni, "Não misturar lotes diferentes dos produtos, pois diferença de tonalidade condiz a", oFontObs,  540, 07, , nPadCenter, )
-	nLinAtu += 010
-	oPrintPvt:SayAlign(nLinAtu, nColIni, "caracteristicas natural do produto de PVC.", 	oFontObs, 540,07,, nPadCenter,)
-	nLinAtu += 025
 	
 	oPrintPvt:SayAlign(nLinAtu, nColIni, "Termo de Autorização",    oFontTit,  540, 07, nCorAzul, nPadCenter, )
 	nLinAtu += 010
