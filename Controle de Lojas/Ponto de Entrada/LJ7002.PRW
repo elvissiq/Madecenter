@@ -30,6 +30,10 @@ User Function LJ7002()
         IF FWAlertNoYes("Imprimir orçamento ?","Impressão")
           u_zROrcVen()
         EndIF
+
+        RecLock("SL1",.F.)
+          SL1->L1_NOMCLI := M->LQ_NOMCLI
+        SL1->(MsUnLock())
      
      ElseIF cOpcao == '2' //Venda
         
