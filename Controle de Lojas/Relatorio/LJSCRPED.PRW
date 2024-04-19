@@ -563,7 +563,7 @@ Local cPicValor     := PesqPict("SL1","L1_VLRTOT")//Picture de valor
 Local nTPCompNCC    := SuperGetMV("MV_LJCPNCC",,1)//Compensacao de NCC 1-Compensacao atual 2- Nova Compensacao 
 Local nVlrCred 		:= aPARAMIXB[1] 	// Valor de credito usado na venda L1_CREDITO
 Local aNCCs 		:= aPARAMIXB[2] 	// Array com todas NCCs abertas do cliente
-Local nTotSelNCC	:= aPARAMIXB[3] 	// Valor Total NCCs selecionadas
+//Local nTotSelNCC	:= aPARAMIXB[3] 	// Valor Total NCCs selecionadas
 Local cCodCli    	:= aPARAMIXB[4] 	// Codigo do Cliente
 Local cCodLojCli	:= aPARAMIXB[5] 	// Codigo da loja do cliente
 
