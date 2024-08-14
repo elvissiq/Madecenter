@@ -20,12 +20,8 @@ User Function LJ7002()
   Local aArea  := FWGetArea()
   Local cOpcao := cValToChar(ParamIxB[1])
   Local lGrvBatch := IIF(ParamIxB[3] == 2,.T.,.F.)
-  Local _cAlias := GetNextAlias()
-  Local cWhere := "%SL4.L4_NUM = '"+SL1->L1_NUM+"' AND SL4.L4_FORMA = 'BOL'%"
 
-  If cOpcao $("1/2") .AND. !(lGrvBatch)
-     
-     If cOpcao == '1' //Orçamento
+  If cOpcao == "1" .AND. !(lGrvBatch)
         
         IF FWAlertNoYes("Imprimir orçamento ?","Impressão")
           u_zROrcVen()
@@ -34,24 +30,7 @@ User Function LJ7002()
         RecLock("SL1",.F.)
           SL1->L1_NOMCLI := M->LQ_NOMCLI
         SL1->(MsUnLock())
-     
-     ElseIF cOpcao == '2' //Venda
-        
-        BeginSql Alias _cAlias
-            SELECT SL4.L4_FORMA FROM %table:SL4% SL4
-            WHERE
-                SL4.L4_FILIAL  = %xFilial:SL4%
-                AND %Exp:cWhere%
-                AND SL4.%notDel%
-        EndSql
-
-        IF !(_cAlias)->(EOF())
-          U_XLOJ001(SL1->L1_NUM)
-        EndIF
-        
-        (_cAlias)->(DbCloseArea())
-     
-     EndIF 
+      
   EndIf
 
   FWRestArea(aArea)

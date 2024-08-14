@@ -783,16 +783,9 @@ Local nId       := 0
 
 	oPrintPvt:SayAlign(nLinAtu, nColIni, "Orçamento válido por "+cValToChar(nValidade)+" dias. Validade: "+cDtValid,    oFontObsN,  540, 07, , nPadCenter, )
 	nLinAtu += 010
-	oPrintPvt:SayAlign(nLinAtu, nColIni, "Este orçamento não pode ser alterado. Quasquer alterações que sejam realizadas neste documento",    	oFontObs,  540, 07, , nPadCenter, )
+	oPrintPvt:SayAlign(nLinAtu, nColIni, "Este orçamento não pode ser alterado. Qualquer alteração que seja realizada neste documento",    	oFontObs,  540, 07, , nPadCenter, )
 	nLinAtu += 010
-	oPrintPvt:SayAlign(nLinAtu, nColIni, "após sua emissão, estarão sujeitas a alteração de preço de acordo com a cotação do dia.",    		 	oFontObs,  540, 07, , nPadCenter, )
-	nLinAtu += 015
-	
-	oPrintPvt:SayAlign(nLinAtu, nColIni, "Termo de Autorização",    oFontTit,  540, 07, nCorAzul, nPadCenter, )
-	nLinAtu += 010
-	oPrintPvt:SayAlign(nLinAtu, nColIni, "Autorizo a compra do material do orçamento acima, assim como o faturamento da ",    	oFontObs,  540, 07, , nPadCenter, )
-	nLinAtu += 010
-	oPrintPvt:SayAlign(nLinAtu, nColIni, "Nota Fiscal na condição de pagamento descrito.",    		 	oFontObs,  540, 07, , nPadCenter, )
+	oPrintPvt:SayAlign(nLinAtu, nColIni, "após sua emissão, estará sujeita a alteração de preço de acordo com a cotação do dia.",    		 	oFontObs,  540, 07, , nPadCenter, )
 	nLinAtu += 040
 	
 	oPrintPvt:SayAlign(nLinAtu, nColIni, Replicate("_",50),  oFontCabN,  540, 07, , nPadCenter, )

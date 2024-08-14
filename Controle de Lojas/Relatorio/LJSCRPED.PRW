@@ -532,7 +532,7 @@ Verifica a existencia do RDMake padrão SCRCRED compilado no RPO, caso não exista
 @since		23/12/2020
 @return
 /*/
-Function LJSCRCRED(aPARAMIXB)   
+User Function LJSCRCRED(aPARAMIXB)   
 Local cRet := ""
 
 If ExistFunc("SCRCRED")

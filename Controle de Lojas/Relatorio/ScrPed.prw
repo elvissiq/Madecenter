@@ -288,8 +288,9 @@ User Function SCRPED()
 
 	If !Empty(cDocPed) .and. !Empty(cSerPed) 
 		sTexto := sTexto + ' ' + Chr(13) + Chr(10)
-		sTexto := sTexto + '<b>Serie Pedido: </b>' + AllTrim(cSerPed) + Chr(13) + Chr(10)
-		sTexto := sTexto + '<b>Doc.  Pedido: </b>' + AllTrim(cDocPed) + Chr(13) + Chr(10)
+		//sTexto := sTexto + '<b>Serie Pedido: </b>' + AllTrim(cSerPed) + Chr(13) + Chr(10)
+		//sTexto := sTexto + '<b>Doc.  Pedido: </b>' + AllTrim(cDocPed) + Chr(13) + Chr(10)
+		sTexto := sTexto + '<b>Orc. Res.: </b>' + AllTrim(SL1->L1_NUM) + Chr(13) + Chr(10)
 		sTexto := sTexto + ' ' + Chr(13) + Chr(10)
 	EndIf
 
@@ -300,8 +301,23 @@ User Function SCRPED()
 	sTexto := sTexto + '<b>Caixa:</b> ' + Alltrim(SL1->L1_ESTACAO)+'<b> Operador: </b>' + Alltrim(SL1->L1_OPERADO)+' - ' +  Alltrim(cNomOpe) + Chr(13) + Chr(10)
 	sTexto := sTexto + Replicate("-", nMaxChar)						     + Chr(13) + Chr(10)
 	sTexto := sTexto + ' ' + Chr(13) + Chr(10)
-	sTexto := sTexto + '<ce>' + cObserv + '</ce>' + Chr(13) + Chr(10) 
+	sTexto := sTexto + '<ce>' + cObserv + '</ce>' + Chr(13) + Chr(10)
 
+	sTexto := sTexto + Replicate("-", nMaxChar)						     + Chr(13) + Chr(10)
+
+	sTexto := sTexto + '<ce>' + 'Prezado(a) Cliente, informamos que o prazo ' + '</ce>' + Chr(13) + Chr(10)
+	sTexto := sTexto + '<ce>' + 'para retirada da mercadoria é de 15 dias ' + '</ce>' + Chr(13) + Chr(10)
+	sTexto := sTexto + '<ce>' + 'a partir do fechamento da venda.' + '</ce>' + Chr(13) + Chr(10)
+	
+	sTexto := sTexto + Replicate("-", nMaxChar)						     + Chr(13) + Chr(10)
+
+	sTexto := sTexto + '<ce>' + 'Prezado(a) Cliente, gostaríamos de informar ' + '</ce>' + Chr(13) + Chr(10)
+	sTexto := sTexto + '<ce>' + 'que o prazo para devolução é de 90 dias ' + '</ce>' + Chr(13) + Chr(10)
+	sTexto := sTexto + '<ce>' + 'a partir da data de recebimento do produto. ' + '</ce>' + Chr(13) + Chr(10)
+	sTexto := sTexto + '<ce>' + 'Agradecemos pela sua atenção! ' + '</ce>' + Chr(13) + Chr(10)
+
+	sTexto := sTexto + Replicate("-", nMaxChar)						     + Chr(13) + Chr(10)
+	
 	RestArea(aAreaSL1)
 	RestArea(aAreaSL2)  
 	RestArea(aArea)
