@@ -5,7 +5,7 @@
   @author Totvs Nordeste (Elvis Siqueira)
   @owner Totvs S/A
   @version Protheus 10, Protheus 11,Protheus 12
-  @since 09/05/2024 
+  @since 23/08/2024 
   @sample
         Ponto de Entrada utilizado para realizar a Reserva dos produtos da venda sem a exibicao da interface para o usuario.
         Este ponto de entrada eh utilizado apenas para selecionar as opcoes que o sistema passa como parametro, ou seja,
@@ -15,7 +15,7 @@
   @project
   @menu 
   @history
-  09/05/2024 - Desenvolvimento da Rotina.
+  23/08/2024 - Desenvolvimento da Rotina.
 /*/
 
 User Function LJRESERV()
@@ -26,23 +26,28 @@ User Function LJRESERV()
   Private aLojas    := PARAMIXB[2] //Lojas disponiveis para efetuar a Reserva
   Private aProdutos := PARAMIXB[3] //Produtos da venda que a serem reservados
   Private aEstoque  := PARAMIXB[4] //Saldos dos Estoques nas lojas/armazem
-  Private lConfirma := .F.
+  Private lConfirma := .T.
 
   Do Case 
+      //Operacao 1: Selecao das "LOJAS" onde serao reservados os produtos e selecao dos "PRODUTOS" que serao reservados
     Case cOper == "1"
       fSelectLj()
-      //fReserva()
-      aRet := { lConfirma, aLojas, aProdutos, aEstoque }
-    Case cOper != "1"
-      aRet := { lConfirma, aLojas, aProdutos, aEstoque }
+      
+      //Operacao 2: Selecao do "ARMAZEM" (Local de Estoque) relacionado a loja onde serao reservados os produtos
+    Case cOper == "2"
+      fReserv()
+      
   End Case 
+
+  aRet := { lConfirma, aLojas, aProdutos, aEstoque }
 
   FWRestArea(aArea)
   
 Return aRet
 
 /*/{Protheus.doc} fSelectLj
-Tela para seleção das Lojas e Produtos
+Selecao das "LOJAS" onde serao reservados os produtos
+Selecao dos "PRODUTOS" que serao reservados
 @type function
 @return return_type, return_description
 /*/
@@ -116,5 +121,78 @@ Static Function fSelectLj()
 		Aviso( "Atenção", "Não foi selecionado nenhum produto para consulta", {"Ok"} )
 		lContinua := .F.
 	Endif
+
+Return
+
+/*/{Protheus.doc} fReserv
+Selecao do "ARMAZEM" (Local de Estoque) relacionado a loja onde serao reservados os produtos
+@type function
+@return return_type, return_description
+/*/
+Static Function fReserv()
+  Local nX          := 0
+	Local nY          := 0
+	Local nZ          := 0
+  Local aEstoqBKP   := aClone(aEstoque)
+	Local cItem       := ""
+	Local cProduto    := ""
+	Local lTemEstoque := .T.
+	Local aPrdSemEst  := {} //Produtos sem estoque
+	Local cMsg        := ""
+	Local cArmazem    := "01"
+
+    //Efetua a reserva dos produtos
+		For nX:=1 To Len(aProdutos)
+
+			cItem    := aProdutos[nX][2] //Item da venda
+			cProduto := aProdutos[nX][3] //Codigo do Produto
+
+			//Faz a Reserva no primeiro Local de Estoque (Armazem) encontrado para a loja escolhida que possua saldo
+			For nY := 1 To Len(aEstoque)
+
+				If aEstoque[nY][8] == cItem .And. aEstoque[nY][4] == cProduto
+
+					lTemEstoque := .F.
+
+					For nZ:=1 To Len(aEstoque[nY][5])
+
+						If !(aEstoque[nY][5][nZ][1] == cArmazem)
+							Loop
+						EndIf
+
+						//Verifica se tem a qtde. suficiente em estoque para reservar
+						If aEstoque[nY][5][nZ][2] >= aEstoque[nY][6] .And. aEstoque[nY][5][nZ][1] == aEstoque[nY][9]
+							aEstoque[nY][5][nZ][2] -= aEstoque[nY][6] //Subtrai a qtde
+							lTemEstoque := .T.
+							Exit
+						EndIf
+
+					Next nZ
+
+					If lTemEstoque
+						aEstoque[nY][1] := .T. //Seleciona
+						Exit
+					EndIf
+
+				EndIf
+
+			Next nY
+
+			If !lTemEstoque
+				aAdd( aPrdSemEst, AllTrim(cProduto) + " - " + AllTrim(Posicione("SB1",1,xFilial("SB1")+cProduto,"B1_DESC")) )
+			EndIf
+
+		Next nX
+
+		//Se nao tem estoque suficiente para reservar todos os produtos, entao aborta todas as reservas
+		If Len(aPrdSemEst) > 0
+			cMsg := "Não existe estoque suficiente para o(s) seguinte(s) produto(s):" + Chr(13) + Chr(10) + Chr(13) + Chr(10)
+			For nX:=1 To Len(aPrdSemEst)
+				cMsg += aPrdSemEst[nX] + Chr(13) + Chr(10)
+			Next nX
+			Alert(cMsg)
+			aEstoque := aEstoqBKP //Devolve o array sem alteracoes
+			lConfirma := .F. //Cancela
+		EndIf
 
 Return
