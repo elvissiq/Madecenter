@@ -70,6 +70,7 @@ User Function SCRPED()
 	Local cNomVen       := Posicione("SA3",1,xFilial("SA3")+SL1->L1_VEND,"A3_NOME")  // Nome do Vendedor
 	Local cNomOpe       := Posicione("SA6",1,xFilial("SA6")+SL1->L1_OPERADO,"A6_NOME")  // Nome do Operador
 	Local cObserv       := SuperGetMV("MV_XOBSRET",.F.,"")
+	Local nY
 
 	If ValType(PARAMIXB) == "A" .AND. Len(PARAMIXB) > 0  
 		If ValType(PARAMIXB[1]) == "A" .AND. Len(PARAMIXB[1]) > 0
@@ -103,7 +104,7 @@ User Function SCRPED()
 	sTexto:= sTexto +'<ce> CNPJ: '+ alltrim(cCgcEnt) + ' IE: '+ alltrim(cInsEnt) +'</ce>'+ Chr(13)+ Chr(10)
 
 	sTexto:= sTexto + Replicate("-", nMaxChar)						   + Chr(13)+ Chr(10)
-	sTexto:= sTexto + '<b><ce>C O M P R O V A N T E   R E T I R A</ce></b>'		   + Chr(13)+ Chr(10)
+	sTexto:= sTexto + '<b><ce>COMPROVANTE DE PAGAMENTO</ce></b>' 	   + Chr(13)+ Chr(10)
 	sTexto:= sTexto + Replicate("-", nMaxChar)						   + Chr(13)+ Chr(10)
 	sTexto:= sTexto + 'Codigo         Descricao' 					   + Chr(13)+ Chr(10)
 	sTexto:= sTexto + 'Qtd             VlrUnit              VlrTot'    + Chr(13)+ Chr(10)
@@ -275,11 +276,15 @@ User Function SCRPED()
 	EndIf
 	If nFinanc > 0 
 		sTexto := sTexto + 'CARTEIRA' + '                   ' + Str(nFinanc, 15, 2) + ' (+)' + Chr(13) + Chr(10)
-		U_CARTEIRA(nFinanc)
+		For nY := 1 To 2
+			U_CARTEIRA(nFinanc)
+		Next
 	EndIf  
 	If nCredito > 0
 		sTexto := sTexto + 'CREDITO ' + '                   ' + Str(nCredito, 15, 2) + ' (+)' + Chr(13) + Chr(10)
-		U_SCRCRED()
+		For nY := 1 To 2
+			U_SCRCRED()
+		Next
 	EndIf			 
 	If lMvLjTroco .And. nTroco > 0
 		sTexto := sTexto + 'TROCO   ' + '                   ' + Str(nTroco, 15, 2) +' (-)'+ Chr(13) + Chr(10)
