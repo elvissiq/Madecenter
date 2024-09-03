@@ -5,7 +5,7 @@
   @author Totvs Nordeste (Elvis Siqueira)
   @owner Totvs S/A
   @version Protheus 10, Protheus 11,Protheus 12
-  @since 07/02/2024
+  @since 30/08/2024
   @sample
   			Ponto de Entrada chamado depois da gravação de todos os dados 
         e da impressão do cupom fiscal na Venda Assistida e após o processamento do Job LjGrvBatch
@@ -23,9 +23,11 @@ User Function LJ7002()
 
   If cOpcao == "1" .AND. !(lGrvBatch)
         
-        IF FWAlertNoYes("Imprimir orçamento ?","Impressão")
-          u_zROrcVen()
-        EndIF
+        IF INCLUI .Or. ALTERA 
+          If ExistBlock("MLJF04")
+		   		  ExecBlock("MLJF04",.F.,.F.,{})
+		   	  EndIf
+        EndIF 
 
         RecLock("SL1",.F.)
           SL1->L1_NOMCLI := M->LQ_NOMCLI

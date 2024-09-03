@@ -46,17 +46,17 @@ Static cMaskPrc   := "@E 99,999,999,999.99"             //Mascara de preço
 Static cMaskVlr   := "@E 99,999,999,999.99"             //Mascara de valor
 Static cMaskFrete := PesqPict("SL1", "L1_FRETE")        //Mascara de frete
 
-/*/{Protheus.doc} zROrcVen
+/*/{Protheus.doc} zROrcComp
 impressao Grafica generica de Orçamento de Venda (em pdf)
 @type function
 @author Elvis Siqueira
-@since 28/02/2023
+@since 30/08/2024
 @version 1.0
 	@example
-	u_zROrcVen()
+	u_zROrcComp()
 /*/
 
-User Function zROrcVen()
+User Function zROrcComp()
 Local aArea      := GetArea()
 Local aAreaL1    := SL1->(GetArea())
 Local oProcess   := Nil

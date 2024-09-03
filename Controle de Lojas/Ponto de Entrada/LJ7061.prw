@@ -14,17 +14,24 @@ User Function LJ7061()
 	Local lRet := .T.
 	Local nPosPro := aScan(aHeader, {|x| Alltrim(x[2])=="LR_PRODUTO" })
 	Local nPosDes := aScan(aHeader, {|x| Alltrim(x[2])=="LR_DESCRI" })
+	Local nPosEnt := aScan(aHeader, {|x| Alltrim(x[2])=="LR_ENTREGA" })
 	Local cCodPro := aCOLS[N][nPosPro]
 	Local cDescPr := AllTrim(aCOLS[N][nPosDes])
 	Local nY 
 
+	DeFault lEntreg := .F.
+
 	For nY := 1 To Len(aCOLS)
-		IF nY != N 
+		IF nY != N .And. aCOLS[N][Len(aCOLS[N])]
 			IF aCOLS[nY][nPosPro] == aCOLS[N][nPosPro]
 				FWAlertWarning("O Produto " + AllTrim(cCodPro) + " - " + cDescPr +", já foi inserido anteriormente.","Produto")
 				lRet := .F.
 			EndIF
 		EndIF 
 	Next 
+
+	IF lRet .And. lEntreg
+		aCOLS[N][nPosEnt] := '3'
+	EndIF 
 
 Return lRet
