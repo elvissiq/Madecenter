@@ -21,7 +21,7 @@ Local cVendedor := SuperGetMV("MV_VENDPAD")
 
   DbSelectArea("SA3")
   SA3->(DbSetOrder(7))
-  IF SA3->(Dbseek(xfilial("SA3")+RetCodUsr()))
+  IF SA3->(Dbseek(xfilial("SA3")+__cUserId))
     cVendedor := SA3->A3_COD
   EndIf 
 
