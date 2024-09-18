@@ -22,7 +22,7 @@ User Function LJ7061()
 	DeFault lEntreg := .F.
 
 	For nY := 1 To Len(aCOLS)
-		IF nY != N .And. aCOLS[N][Len(aCOLS[N])]
+		IF nY != N .And. !(aCOLS[N][Len(aCOLS[N])])
 			IF aCOLS[nY][nPosPro] == aCOLS[N][nPosPro]
 				FWAlertWarning("O Produto " + AllTrim(cCodPro) + " - " + cDescPr +", já foi inserido anteriormente.","Produto")
 				lRet := .F.
