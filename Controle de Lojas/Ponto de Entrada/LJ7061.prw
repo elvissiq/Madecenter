@@ -1,14 +1,15 @@
 #INCLUDE 'Protheus.ch'
 #INCLUDE 'PRTOPDEF.CH'
 
-//------------------------------------------------------------------------
-/*/{PROTHEUS.DOC} ValidSLR
-FUNÇÃO ValidSLR - Valida se o produto já foi inserido no grid de produtos
+//---------------------------------------------------------------------------
+/*/{PROTHEUS.DOC} LJ7061
+PE LJ7061 - Ponto de Entrada chamado para validações na digitação do código 
+			do produto na Venda Assitida e antes da impressão concomitante.
 @OWNER MADECENTER
 @VERSION PROTHEUS 12
-@SINCE 23/08/2024
+@SINCE 24/09/2024
 /*/
-//------------------------------------------------------------------------
+//---------------------------------------------------------------------------
 User Function LJ7061()
 	
 	Local lRet := .T.
@@ -22,7 +23,7 @@ User Function LJ7061()
 	DeFault lEntreg := .F.
 
 	For nY := 1 To Len(aCOLS)
-		IF nY != N .And. !(aCOLS[N][Len(aCOLS[N])])
+		IF nY != N .And. (aCOLS[N][Len(aCOLS[N])])
 			IF aCOLS[nY][nPosPro] == aCOLS[N][nPosPro]
 				FWAlertWarning("O Produto " + AllTrim(cCodPro) + " - " + cDescPr +", já foi inserido anteriormente.","Produto")
 				lRet := .F.

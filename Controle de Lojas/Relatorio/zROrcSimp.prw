@@ -17,14 +17,8 @@ Static nPadCenter := 2                                  //Alinhamento Centraliza
 Static nPosCod    := 0000                               //Posição Inicial da Coluna de Código do Produto 
 Static nPosDesc   := 0000                               //Posição Inicial da Coluna de Descrição
 Static nPosUnid   := 0000                               //Posição Inicial da Coluna de Unidade de Medida
-Static nPosUnid2  := 0000                               //Posição Inicial da Coluna de Unidade de Medida
 Static nPosQuan   := 0000                               //Posição Inicial da Coluna de Quantidade
-Static nPosQuan2  := 0000                               //Posição Inicial da Coluna de Quantidade
-Static nPosVUni   := 0000                               //Posição Inicial da Coluna de Valor Unitario
 Static nPosVTot   := 0000                               //Posição Inicial da Coluna de Valor Total
-Static nPosPacot  := 0000                               //Posição Inicial da Coluna de Quantidade do pacote
-Static nPosVM2    := 0000                               //Posição Inicial da Coluna de Valor do ICMS
-Static nPosIPI    := 0000                               //Posição Inicial da Coluna de Valor do IPI
 Static nTamFundo  := 15                                 //Altura de fundo dos blocos com Titulo
 Static nCorAzul   := RGB(89, 111, 117)                  //Cor Azul usada nos Titulos
 Static cNomeFont  := "Arial"                            //Nome da Fonte padrao
@@ -44,7 +38,6 @@ Static cMaskCPF   := "@R 999.999.999-99"                //Mascara de CPF
 Static cMaskQtd   := "@E 99,999,999,999.99"             //Mascara de quantidade
 Static cMaskPrc   := "@E 99,999,999,999.99"             //Mascara de preço
 Static cMaskVlr   := "@E 99,999,999,999.99"             //Mascara de valor
-Static cMaskFrete := PesqPict("SL1", "L1_FRETE")        //Mascara de frete
 
 /*/{Protheus.doc} zROrcSimp
 impressao Grafica generica de Orçamento de Venda (em pdf)
@@ -99,15 +92,9 @@ Static Function fLayout()
 
 	nPosCod   := 0010 // Codigo do Produto
 	nPosDesc  := 0040 // Descricao
-	nPosUnid  := 0245 // 1ª Unidade de Medida 
-	nPosQuan  := 0275 // Quantidade 1ª UM
-	nPosVUni  := 0310 // Valor Unitario 1ª UM
-	nPosUnid2 := 0350 // 2ª Unidade de Medida 
-	nPosQuan2 := 0375 // Quantidade 2ª UM
-	nPosVM2   := 0410 // Valor da 2ª UM
-	nPosIPI   := 0440 // Valor do IPI
+	nPosUnid  := 0380 // Unidade de Medida 
+	nPosQuan  := 0415 // Quantidade
 	nPosVTot  := 0470 // Valor Total
-	nPosPacot := 0507 // Quantidade de Pacotes
 Return
 
 /*---------------------------------------------------------------------*
@@ -513,8 +500,8 @@ Static Function fImpCab()
 	nLinCab += 002
 	oPrintPvt:SayAlign(nLinCab, nPosCod,   "Código", 	oFontDetN, 200, 07,, nPadLeft,)
 	oPrintPvt:SayAlign(nLinCab, nPosDesc,  "Descricao", oFontDetN, 200, 07,, nPadLeft,)
-	oPrintPvt:SayAlign(nLinCab, nPosUnid,  "1ª UM",     oFontDetN, 200, 07,, nPadLeft,)
-	oPrintPvt:SayAlign(nLinCab, nPosQuan,  "Qtd. 1ª", 	oFontDetN, 200, 07,, nPadLeft,)
+	oPrintPvt:SayAlign(nLinCab, nPosUnid,  "UM",        oFontDetN, 200, 07,, nPadLeft,)
+	oPrintPvt:SayAlign(nLinCab, nPosQuan,  "Qtd.", 	    oFontDetN, 200, 07,, nPadLeft,)
 	//Atualizando a linha inicial do relatorio
 	nLinAtu := nLinCab + 020
 Return
@@ -592,8 +579,6 @@ Return cLogo
  *---------------------------------------------------------------------*/
 
 Static Function fImpTot()
-	Local cFretePed  := ""
-	Local nTotAPagar := 0
 
 	nLinAtu += 4
 	
@@ -603,50 +588,8 @@ Static Function fImpTot()
 		fImpCab()
 	EndIf
 	
-	//Cria o grupo de Total
-	oPrintPvt:SayAlign(nLinAtu-2, nColIni-50, "Totais:  ", 							oFontTit, nColFin-nColIni, nTamFundo, nCorAzul, nPadCenter, )
-	oPrintPvt:SayAlign(nLinAtu, nPosQuan, 	Alltrim(Transform(nQdtTot, cMaskQtd)),  oFontCabN, 080, 07, , nPadLeft, )
-	oPrintPvt:SayAlign(nLinAtu, nPosQuan2, 	Alltrim(Transform(nQdtTot2, cMaskQtd)), oFontCabN, 080, 07, , nPadLeft, )
-	oPrintPvt:SayAlign(nLinAtu, nPosVUni, 	Alltrim(Transform(nVUnTot, cMaskPrc)),  oFontCabN, 080, 07, , nPadLeft, )
-	oPrintPvt:SayAlign(nLinAtu, nPosVTot, 	Alltrim(Transform(nValorTot, cMaskVlr)),oFontCabN, 080, 07, , nPadLeft, )
-
-	nLinAtu += 015
-
-	oPrintPvt:SayAlign(nLinAtu, nPosVTot-60, "Frete:", oFontCabN, 200, 07, , nPadLeft, )
-
-    Do Case
-	   Case QRY_PED->L1_TPFRET == "C"
-		    cFretePed := "CIF"
-
-	   Case QRY_PED->L1_TPFRET == "F"
-		    cFretePed := "FOB"
-
-	   Case QRY_PED->L1_TPFRET == "T"
-		    cFretePed := "Terceiros"
-	
-	   Otherwise
-		    cFretePed := "Sem Frete"
-	EndCase
-
-	cFretePed += " - " + Alltrim(Transform(QRY_PED->L1_FRETE, cMaskFrete))
-
-	oPrintPvt:SayAlign(nLinAtu, nPosVTot, cFretePed, oFontCab, 200,07,, nPadLeft,)
-
-    nLinAtu += 15
-
-    oPrintPvt:SayAlign(nLinAtu, nPosVTot-60, "Desconto:", oFontCabN, 200, 07, , nPadLeft, )
-	oPrintPvt:SayAlign(nLinAtu, nPosVTot, 	 Alltrim(Transform(nTotDesc, cMaskVlr)),oFontCabN, 080, 07, , nPadLeft, )
-
-    nLinAtu += 15
-
-    oPrintPvt:Line(nLinAtu, nPosVTot, nLinAtu, nPosVTot + 60)
-
-    nTotAPagar := (nValorTot + QRY_PED->L1_FRETE) - nTotDesc 
-
-    nLinAtu += 05
-
     oPrintPvt:SayAlign(nLinAtu, nPosVTot-60, "Total a Pagar:", oFontCabN, 200, 07, , nPadLeft, )
-	oPrintPvt:SayAlign(nLinAtu, nPosVTot, 	 Alltrim(Transform(nTotAPagar, cMaskVlr)),oFontCabN, 080, 07, , nPadLeft, )
+	oPrintPvt:SayAlign(nLinAtu, nPosVTot, 	 Alltrim(Transform(nValorTot, cMaskVlr)),oFontCabN, 080, 07, , nPadLeft, )
 Return
 
 /*---------------------------------------------------------------------*

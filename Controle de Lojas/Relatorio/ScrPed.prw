@@ -375,7 +375,7 @@ Funcao para impressao do comprovante de Retira
 /*/
 //-------------------------------------------------------------------
 Static Function fCompRet(pPos)
-	Local cComprov := IIF(pPos == 1, 'MADEIRA', IIF(pPos == 2, 'FERRAGEM', 'SEM CATEGORIA'))
+	Local cComprov := IIF(pPos == 1, 'MADEIRA', 'DIVERSOS')
 	Local cMsg     := ""
 	Local nLinMsg  := 0
 	Local nY       := 0
