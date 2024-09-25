@@ -76,6 +76,9 @@ User Function SCRRPS()
 	Local cNomCli       := Posicione("SA1",1,xFILIAL("SA1")+SL1->L1_CLIENTE+SL1->L1_LOJA,"A1_NREDUZ") //Nome do Cliente
 	Local cNomVen       := Posicione("SA3",1,xFilial("SA3")+SL1->L1_VEND,"A3_NOME")  // Nome do Vendedor
 	Local cNomOpe       := Posicione("SA6",1,xFilial("SA6")+SL1->L1_OPERADO,"A6_NOME")  // Nome do Operador
+	Local cMsg     		:= ""
+	Local nLinMsg  		:= 0
+	Local nY       		:= 0
 
 	If FindClass("FWSM0Util") //Proteção, para ambiente com RPO Ctree essa função não existe
 		aFilCodMun	:= FWSM0Util():GetSM0Data( cEmpAnt, cFilAnt , { "M0_CODMUN","M0_CIDCOB" } )
@@ -219,6 +222,19 @@ User Function SCRRPS()
 	sTexto := sTexto + '<b><ce>Caixa:</b></ce> ' + Alltrim(SL1->L1_ESTACAO)+'<b><ce> Operador: </b></ce>' + Alltrim(SL1->L1_OPERADO)+' - ' +  Alltrim(cNomOpe) + Chr(13) + Chr(10)
 	sTexto := sTexto + Replicate("-", nMaxChar)						     + Chr(13) + Chr(10)
 	sTexto := sTexto + ' ' + Chr(13) + Chr(10)
+
+	sTexto := sTexto + '<b><ce>Observacoes:</b></ce> ' + Chr(13) + Chr(10)
+
+	If !Empty(SL1->L1_XMSGI)
+		cMsg    := SL1->L1_XMSGI
+		nLinMsg := MLCount(SL1->L1_XMSGI,nMaxChar)
+
+		For nY := 1 To nLinMsg
+			sTexto := sTexto + '<ce>' + MemoLine(cMsg,nMaxChar,nY) + '</ce>' + Chr(13) + Chr(10)
+		Next nY
+		
+		sTexto := sTexto + ' ' + Chr(13) + Chr(10)
+	EndIf
 
 Return sTexto
 
