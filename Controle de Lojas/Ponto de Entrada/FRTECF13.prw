@@ -17,7 +17,7 @@ User Function FRTECF13()
   Local nPosEnt  := aScan(aHeader, {|x| Alltrim(x[2])=="LR_ENTREGA" })
   Local lRet     := .T.
 
-  IF FR13_CONTROL .And. SB1->B1_VALEPRE == '1' //Produto do tipo Vale Presente
+  IF FR13_CONTROL .And. SB1->B1_VALEPRE == '1' .And. INCLUI //Produto do tipo Vale Presente
 		fTelaPrc()
     aCols[N][nPosEnt] := '2'
     FR13_CONTROL := .F.
