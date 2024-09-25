@@ -91,7 +91,7 @@ Static Function fLayout()
 	oFontObsN  := TFont():New(cNomeFont, , -11, , .T.)
 
 	nPosCod   := 0010 // Codigo do Produto
-	nPosDesc  := 0040 // Descricao
+	nPosDesc  := 0060 // Descricao
 	nPosUnid  := 0380 // Unidade de Medida 
 	nPosQuan  := 0415 // Quantidade
 	nPosVTot  := 0470 // Valor Total

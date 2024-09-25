@@ -18,6 +18,7 @@ User Function LJ7061()
 	Local nPosEnt := aScan(aHeader, {|x| Alltrim(x[2])=="LR_ENTREGA" })
 	Local cCodPro := aCOLS[N][nPosPro]
 	Local cDescPr := AllTrim(aCOLS[N][nPosDes])
+	Local lProdSV := ( AllTrim(Posicione("SB1",1,xFilial("SB1")+cCodPro,"B1_TIPO")) == 'SV' )
 	Local nY 
 
 	DeFault lEntreg := .F.
@@ -30,6 +31,10 @@ User Function LJ7061()
 			EndIF
 		EndIF 
 	Next 
+
+	IF lRet .And. lProdSV
+		aCOLS[N][nPosEnt] := '2'
+	EndIF  
 
 	IF lRet .And. lEntreg
 		aCOLS[N][nPosEnt] := '3'

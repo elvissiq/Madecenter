@@ -19,29 +19,29 @@
 /*/
 
 User Function LJRESERV()
-  Local aArea := FWGetArea()
-  Local aRet  := {} //Retorno da funcao
-  Local cOper := PARAMIXB[1] //Tipo de Operação em execução (1=Momento; 2=Momento)
+	Local aArea := FWGetArea()
+	Local aRet  := {} //Retorno da funcao
+	Local cOper := PARAMIXB[1] //Tipo de Operação em execução (1=Momento; 2=Momento)
+	
+	Private aLojas    := PARAMIXB[2] //Lojas disponiveis para efetuar a Reserva
+	Private aProdutos := PARAMIXB[3] //Produtos da venda que a serem reservados
+	Private aEstoque  := PARAMIXB[4] //Saldos dos Estoques nas lojas/armazem
+	Private lConfirma := .T.
   
-  Private aLojas    := PARAMIXB[2] //Lojas disponiveis para efetuar a Reserva
-  Private aProdutos := PARAMIXB[3] //Produtos da venda que a serem reservados
-  Private aEstoque  := PARAMIXB[4] //Saldos dos Estoques nas lojas/armazem
-  Private lConfirma := .T.
+	Do Case 
+		//Operacao 1: Selecao das "LOJAS" onde serao reservados os produtos e selecao dos "PRODUTOS" que serao reservados
+		Case cOper == "1"
+		fSelectLj()
+		
+		//Operacao 2: Selecao do "ARMAZEM" (Local de Estoque) relacionado a loja onde serao reservados os produtos
+		Case cOper == "2" .And. !Empty(aLojas)
+		fReserv()
+		
+	End Case 
 
-  Do Case 
-      //Operacao 1: Selecao das "LOJAS" onde serao reservados os produtos e selecao dos "PRODUTOS" que serao reservados
-    Case cOper == "1"
-      fSelectLj()
-      
-      //Operacao 2: Selecao do "ARMAZEM" (Local de Estoque) relacionado a loja onde serao reservados os produtos
-    Case cOper == "2"
-      fReserv()
-      
-  End Case 
+	aRet := { lConfirma, aLojas, aProdutos, aEstoque }
 
-  aRet := { lConfirma, aLojas, aProdutos, aEstoque }
-
-  FWRestArea(aArea)
+	FWRestArea(aArea)
   
 Return aRet
 
