@@ -32,8 +32,8 @@ User Function MLJF06()
   Private aFields1 := {}
   Private aFields2 := {}
 
-  aAdd(aFields1,{"T1_CLIENT","C", FWTamSX3("A1_CGC")[1]    , FWTamSX3("A1_CGC")[2]    , "Código ou CNPJ/CPF" ,"","SA1AZ0"})
-  aAdd(aFields1,{"T1_NOMCLI","C", FWTamSX3("A1_NOME")[1]   , FWTamSX3("A1_NOME")[2]   , "Nome Cliente"       ,"",""      })
+  aAdd(aFields1,{"T1_CLIENT","C", FWTamSX3("A1_CGC")[1]    , FWTamSX3("A1_CGC")[2]    , "Código ou CNPJ/CPF" ,"","XSA1"})
+  aAdd(aFields1,{"T1_NOMCLI","C", FWTamSX3("A1_NOME")[1]   , FWTamSX3("A1_NOME")[2]   , "Nome Cliente"       ,"",""    })
   
   oTabTMP1:SetFields(aFields1)
   oTabTMP1:AddIndex("01", {"T1_CLIENT"})

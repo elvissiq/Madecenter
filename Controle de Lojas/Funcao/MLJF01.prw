@@ -34,10 +34,10 @@ User Function MLJF01()
 
     oTableTMP  := FWTemporaryTable():New("TMP")
 
-    aAdd(aFieldsTMP,{"TMP_CLIENT","C", FWTamSX3("A1_CGC")[1]    , FWTamSX3("A1_CGC")[2]    , "Código ou CNPJ/CPF" ,"","SA1AZ0"})
-    aAdd(aFieldsTMP,{"TMP_NOMCLI","C", FWTamSX3("A1_NOME")[1]   , FWTamSX3("A1_NOME")[2]   , "Nome Cliente"       ,"",""      })
-    aAdd(aFieldsTMP,{"TMP_DTINI" ,"D", FWTamSX3("L1_EMISSAO")[1], FWTamSX3("L1_EMISSAO")[2], "Data Inicio"        ,"",""      })
-    aAdd(aFieldsTMP,{"TMP_DTFIM" ,"D", FWTamSX3("L1_EMISSAO")[1], FWTamSX3("L1_EMISSAO")[2], "Data Fim"           ,"",""      })
+    aAdd(aFieldsTMP,{"TMP_CLIENT","C", FWTamSX3("A1_CGC")[1]    , FWTamSX3("A1_CGC")[2]    , "Código ou CNPJ/CPF" ,"","XSA1"})
+    aAdd(aFieldsTMP,{"TMP_NOMCLI","C", FWTamSX3("A1_NOME")[1]   , FWTamSX3("A1_NOME")[2]   , "Nome Cliente"       ,"",""    })
+    aAdd(aFieldsTMP,{"TMP_DTINI" ,"D", FWTamSX3("L1_EMISSAO")[1], FWTamSX3("L1_EMISSAO")[2], "Data Inicio"        ,"",""    })
+    aAdd(aFieldsTMP,{"TMP_DTFIM" ,"D", FWTamSX3("L1_EMISSAO")[1], FWTamSX3("L1_EMISSAO")[2], "Data Fim"           ,"",""    })
 
     oTableTMP:SetFields(aFieldsTMP)
     oTableTMP:AddIndex("01", {"TMP_CLIENT"})
