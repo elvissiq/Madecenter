@@ -21,7 +21,7 @@ User Function LJ7061()
 	Local lProdSV := ( AllTrim(Posicione("SB1",1,xFilial("SB1")+cCodPro,"B1_TIPO")) == 'SV' )
 	Local nY 
 
-	DeFault lEntreg := .F.
+	DeFault lNota := .F.
 
 	For nY := 1 To Len(aCOLS)
 		IF nY != N .And. (aCOLS[N][Len(aCOLS[N])])
@@ -36,7 +36,7 @@ User Function LJ7061()
 		aCOLS[N][nPosEnt] := '2'
 	EndIF  
 
-	IF lRet .And. lEntreg
+	IF lRet .And. lNota
 		aCOLS[N][nPosEnt] := '3'
 	EndIF 
 

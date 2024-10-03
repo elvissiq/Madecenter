@@ -7,7 +7,7 @@
 /*/{PROTHEUS.DOC} MLJF06
 FUNÇÃO MLJF06 - Tela para consulta de Vale Presente
 @VERSION PROTHEUS 12
-@SINCE 25/09/2024
+@SINCE 01/10/2024
 /*/
 //----------------------------------------------------------------------
 
@@ -39,20 +39,20 @@ User Function MLJF06()
   oTabTMP1:AddIndex("01", {"T1_CLIENT"})
   oTabTMP1:Create()
 
-  aAdd(aFields2,{"T2_LEGEND","C", 50 ,0    , "Status" ,"@BMP",""})
-  aAdd(aFields2,{"T2_CODIGO","C", FWTamSX3("MDD_CODIGO")[1] , FWTamSX3("MDD_CODIGO")[2] , "Código"             ,"",""})
-  aAdd(aFields2,{"T2_VALOR" ,"N", FWTamSX3("MDD_VALOR")[1]  , FWTamSX3("MDD_VALOR")[2]  , "Valor"              ,PesqPict("MDD", "MDD_VALOR"),""})
-  aAdd(aFields2,{"T2_SALDO" ,"N", FWTamSX3("MDD_SALDO")[1]  , FWTamSX3("MDD_SALDO")[2]  , "Saldo"              ,PesqPict("MDD", "MDD_SALDO"),""})
-  aAdd(aFields2,{"T2_VEND"  ,"C", FWTamSX3("MDD_VEND")[1]   , FWTamSX3("MDD_VEND")[2]   , "Vendedor"           ,"",""})
-  aAdd(aFields2,{"T2_NOME"  ,"C", FWTamSX3("A3_NOME")[1]    , FWTamSX3("A3_NOME")[2]    , "Nome"               ,"",""})
-  aAdd(aFields2,{"T2_DOCV"  ,"C", FWTamSX3("MDD_DOCV")[1]   , FWTamSX3("MDD_DOCV")[2]   , "Documento de Venda" ,"",""})
-  aAdd(aFields2,{"T2_ESTV"  ,"C", FWTamSX3("MDD_ESTV")[1]   , FWTamSX3("MDD_ESTV")[2]   , "Estação da Venda"   ,"",""})
-  aAdd(aFields2,{"T2_PDVV"  ,"C", FWTamSX3("MDD_PDVV")[1]   , FWTamSX3("MDD_PDVV")[2]   , "PDV da Venda"       ,"",""})
-  aAdd(aFields2,{"T2_DATAV" ,"D", FWTamSX3("MDD_DATAV")[1]  , FWTamSX3("MDD_DATAV")[2]  , "Data da Venda"      ,"",""})
-  aAdd(aFields2,{"T2_HORAV" ,"C", FWTamSX3("MDD_HORAV")[1]  , FWTamSX3("MDD_HORAV")[2]  , "Hora da Venda"      ,"",""})
+  aAdd(aFields2,{"T2_LEGEND"  ,"C", 50                        , 0                         , "Status"        ,"@BMP",""})
+  aAdd(aFields2,{"T2_FILIAL"  ,"C", FWTamSX3("E1_FILIAL")[1]  , FWTamSX3("E1_FILIAL")[2]  , "Cod. Filial"   ,"",""})
+  aAdd(aFields2,{"T2_NOMFIL"  ,"C", 50                        , 0                         , "Nome Filial"   ,"",""})
+  aAdd(aFields2,{"T2_PREFIXO" ,"C", FWTamSX3("E1_PREFIXO")[1] , FWTamSX3("E1_PREFIXO")[2] , "Prefixo"       ,"",""})
+  aAdd(aFields2,{"T2_NUM"     ,"C", FWTamSX3("E1_NUM")[1]     , FWTamSX3("E1_NUM")[2]     , "Num. Credito"  ,"",""})
+  aAdd(aFields2,{"T2_VALOR"   ,"N", FWTamSX3("E1_VALOR")[1]   , FWTamSX3("E1_VALOR")[2]   , "Valor"         ,PesqPict("SE1", "E1_VALOR"),""})
+  aAdd(aFields2,{"T2_SALDO"   ,"N", FWTamSX3("E1_SALDO")[1]   , FWTamSX3("E1_SALDO")[2]   , "Saldo"         ,PesqPict("SE1", "E1_SALDO"),""})
+  aAdd(aFields2,{"T2_EMISSAO" ,"D", FWTamSX3("E1_EMISSAO")[1] , FWTamSX3("E1_EMISSAO")[2] , "Emissao"       ,"",""})
+  aAdd(aFields2,{"T2_VENCREA" ,"D", FWTamSX3("E1_VENCREA")[1] , FWTamSX3("E1_VENCREA")[2] , "Validade"      ,"",""})
+  aAdd(aFields2,{"T2_CODCLI"  ,"C", FWTamSX3("A1_COD")[1]     , FWTamSX3("A1_COD")[2]     , "Cod. Cliente"  ,"",""})
+  aAdd(aFields2,{"T2_NOMCLI"  ,"C", FWTamSX3("A1_NOME")[1]    , FWTamSX3("A1_NOME")[2]    , "Nome Cliente"  ,"",""})
   
   oTabTMP2:SetFields(aFields2)
-  oTabTMP2:AddIndex("01", {"T2_CODIGO"})
+  oTabTMP2:AddIndex("01", {"T2_FILIAL","T2_PREFIXO","T2_NUM"})
   oTabTMP2:Create()
 
   FWExecView("",'MLJF06',3,,{||.T.},,,aButtons)
@@ -249,14 +249,14 @@ Static Function fConsulta(oView)
     oView:Refresh()
 
     cQry := " SELECT * "
-    cQry += " FROM "+RetSQLName("MDD")+" MDD "
-    cQry += " INNER JOIN "+RetSQLName("SA3")+" SA3 ON SA3.A3_COD = MDD.MDD_VEND"
-    cQry += " INNER JOIN "+RetSQLName("SA1")+" SA1 ON SA1.A1_COD = MDD.MDD_CLIV"
-    cQry += " WHERE MDD.D_E_L_E_T_ <> '*' "
-    cQry += " 	AND SA3.D_E_L_E_T_ <> '*' "
+    cQry += " FROM "+RetSQLName("SE1")+" SE1 "
+    cQry += " INNER JOIN SYS_COMPANY SM0 ON SM0.M0_CODFIL = SE1.E1_FILIAL "
+    cQry += " INNER JOIN "+RetSQLName("SA1")+" SA1 ON SA1.A1_COD = SE1.E1_CLIENTE "
+    cQry += " WHERE SE1.D_E_L_E_T_ <> '*' "
+    cQry += " 	AND SE1.E1_ORIGEM = 'STIPOSMA' "
+    cQry += " 	AND SE1.E1_TIPO   = 'NCC' "
+    cQry += " 	AND SM0.D_E_L_E_T_ <> '*' "
     cQry += " 	AND SA1.D_E_L_E_T_ <> '*' "
-    cQry += " 	AND MDD.MDD_FILIAL = '" + xFilial("MDD") + "'"
-    cQry += " 	AND SA3.A3_FILIAL = '" + xFilial("SA3") + "'"
     cQry += " 	AND SA1.A1_FILIAL = '" + xFilial("SA1") + "'"
     cQry += " 	AND ( SA1.A1_COD = '"+AllTrim(oModelTMP1:GetValue("T1_CLIENT"))+"' OR SA1.A1_CGC = '"+AllTrim(oModelTMP1:GetValue("T1_CLIENT"))+"' ) "
     cQry := ChangeQuery(cQry)
@@ -272,24 +272,24 @@ Static Function fConsulta(oView)
         EndIF 
 
         Do Case
-          Case (_cAlias)->MDD_VALOR == (_cAlias)->MDD_SALDO
+          Case (_cAlias)->E1_VALOR == (_cAlias)->E1_SALDO
             oModelTMP2:LoadValue("T2_LEGEND", "BR_VERDE"    )
-          Case Empty((_cAlias)->MDD_SALDO)
+          Case Empty((_cAlias)->E1_SALDO)
             oModelTMP2:LoadValue("T2_LEGEND", "BR_VERMELHO" )
-          Case (_cAlias)->MDD_SALDO < (_cAlias)->MDD_VALOR
+          Case (_cAlias)->E1_SALDO < (_cAlias)->E1_VALOR
             oModelTMP2:LoadValue("T2_LEGEND", "BR_AZUL"     )
         EndCase
 
-        oModelTMP2:LoadValue("T2_CODIGO",(_cAlias)->MDD_CODIGO      )
-        oModelTMP2:LoadValue("T2_VALOR" ,(_cAlias)->MDD_VALOR       )
-        oModelTMP2:LoadValue("T2_SALDO" ,(_cAlias)->MDD_SALDO       )
-        oModelTMP2:LoadValue("T2_VEND"  ,(_cAlias)->MDD_VEND        )
-        oModelTMP2:LoadValue("T2_NOME"  ,(_cAlias)->A3_NOME         )
-        oModelTMP2:LoadValue("T2_DOCV"  ,(_cAlias)->MDD_DOCV        )
-        oModelTMP2:LoadValue("T2_ESTV"  ,(_cAlias)->MDD_ESTV        )
-        oModelTMP2:LoadValue("T2_PDVV"  ,(_cAlias)->MDD_PDVV        )
-        oModelTMP2:LoadValue("T2_DATAV" ,STOD((_cAlias)->MDD_DATAV) )
-        oModelTMP2:LoadValue("T2_HORAV" ,(_cAlias)->MDD_HORAV       )
+        oModelTMP2:LoadValue("T2_FILIAL"  , (_cAlias)->E1_FILIAL        )
+        oModelTMP2:LoadValue("T2_NOMFIL"  , (_cAlias)->M0_FILIAL        )
+        oModelTMP2:LoadValue("T2_PREFIXO" , (_cAlias)->E1_PREFIXO       )
+        oModelTMP2:LoadValue("T2_NUM"     , (_cAlias)->E1_NUM           )
+        oModelTMP2:LoadValue("T2_VALOR"   , (_cAlias)->E1_VALOR         )
+        oModelTMP2:LoadValue("T2_SALDO"   , (_cAlias)->E1_SALDO         )
+        oModelTMP2:LoadValue("T2_EMISSAO" , STOD((_cAlias)->E1_EMISSAO) )
+        oModelTMP2:LoadValue("T2_VENCREA" , STOD((_cAlias)->E1_VENCREA) )
+        oModelTMP2:LoadValue("T2_CODCLI"  , (_cAlias)->A1_COD           )
+        oModelTMP2:LoadValue("T2_NOMCLI"  , (_cAlias)->A1_NOME          )
         
         oView:Refresh('VIEW_TMP2')
     
@@ -316,7 +316,7 @@ Static Function fOrcamento()
 
   DBSelectArea("SL1")
   SL1->(DBSetOrder(2))
-  IF SL1->(MSSeek(xFilial("SL1") + T2->T2_ESTV + T2->T2_DOCV + T2->T2_PDVV ))
+  IF SL1->(MSSeek(xFilial("SL1") + T2->T2_PREFIXO + T2->T2_NUM ))
     Lj7Venda("SL1", Recno(), 2)
   EndIF 
 

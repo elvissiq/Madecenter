@@ -70,6 +70,7 @@ User Function SCRPED()
 	Private cNomOpe       	:= Posicione("SA6",1,xFilial("SA6")+SL1->L1_OPERADO,"A6_NOME")  // Nome do Operador
 	Private cTxImp        	:= ""
 	Private aPrdMaFe     	:= {}
+	Private lValePre        := !(Empty(SL2->L2_VALEPRE))
 
 	If ValType(PARAMIXB) == "A" .AND. Len(PARAMIXB) > 0  
 		If ValType(PARAMIXB[1]) == "A" .AND. Len(PARAMIXB[1]) > 0
@@ -84,20 +85,21 @@ User Function SCRPED()
 		If ValType(PARAMIXB) == "A" .AND. Len(PARAMIXB) >= 4 .AND. ValType(PARAMIXB[4]) == "A"
 			cSerPed := PARAMIXB[4,1,1]
 			cDocPed := PARAMIXB[4,1,2]
-		Else
+		ElseIF !(IsInCallStack("STIPOSMAIN"))
 			Return sTexto 
 		EndIf
 	EndIf
 
 	fCompPag()
 
-	fPrdMadFerr()
-
-	For nY := 1 To Len(aPrdMaFe)
-		If !Empty(aPrdMaFe[nY])
-			fCompRet(nY)
-		EndIF
-	Next 
+	If !(lValePre)
+		fPrdMadFerr()
+		For nY := 1 To Len(aPrdMaFe)
+			If !Empty(aPrdMaFe[nY])
+				fCompRet(nY)
+			EndIF
+		Next
+	EndIF 
 
 	FWRestArea(aAreaSL1)
 	FWRestArea(aAreaSL2)  
@@ -118,14 +120,15 @@ Funcao para impressao do comprovante de pagamento
 /*/
 //-------------------------------------------------------------------
 Static Function fCompPag() 
-	
+	Local cDesComp := IIF(lValePre,"CREDITO","PAGAMENTO")
+
 	sTexto:= '<ce>'+ alltrim(cNomCom) +'</ce>'+ Chr(13)+ Chr(10)
 	sTexto:= sTexto +'<ce>'+ alltrim(cEndEnt) + ' - '+ alltrim(cBaiEnt) +'</ce>'+ Chr(13)+ Chr(10)
 	sTexto:= sTexto +'<ce>'+ alltrim(cCidEnt) + ' - '+ alltrim(cEstEnt) + ' CEP:'+ alltrim(cCepEnt) +'</ce>'+ Chr(13)+ Chr(10)
 	sTexto:= sTexto +'<ce> CNPJ: '+ alltrim(cCgcEnt) + ' IE: '+ alltrim(cInsEnt) +'</ce>'+ Chr(13)+ Chr(10)
 
 	sTexto:= sTexto + Replicate("-", nMaxChar)						   + Chr(13)+ Chr(10)
-	sTexto:= sTexto + '<b><ce>COMPROVANTE DE PAGAMENTO</ce></b>' 	   + Chr(13)+ Chr(10)
+	sTexto:= sTexto + '<b><ce>COMPROVANTE DE ' + cDesComp + '</ce></b>'+ Chr(13)+ Chr(10)
 	sTexto:= sTexto + Replicate("-", nMaxChar)						   + Chr(13)+ Chr(10)
 	dbSelectArea("SL1")                                                                  
 	dbSetOrder(1)  
@@ -276,7 +279,7 @@ Static Function fCompPag()
 		sTexto := sTexto + 'CONVENIO' + '                   ' + Str(nConveni, 15, 2) + ' (+)' + Chr(13) + Chr(10)
 	EndIf
 	If nOutros > 0 
-		sTexto := sTexto + 'Outros' + '                      ' + Str(nOutros, 15, 2) + ' (+)' + Chr(13) + Chr(10)
+		sTexto := sTexto + 'OUTROS' + '                      ' + Str(nOutros, 15, 2) + ' (+)' + Chr(13) + Chr(10)
 	EndIf
 	If nVales > 0 
 		sTexto := sTexto + 'VALES' + '                      ' + Str(nVales, 15, 2) + ' (+)' + Chr(13) + Chr(10)
@@ -345,14 +348,17 @@ Static Function fPrdMadFerr()
 			cGrpProd := Posicione("SB1",1,xFilial("SB1") + SL2->L2_PRODUTO,"SB1->B1_GRUPO")
 
 			IF ACV->(MSSeek(xFilial("ACV")+cGrpProd))
+				/*
 				Do Case
 					Case ACV->ACV_CATEGO == '000001'
 						aAdd(aPrdMaFe[1],{ SL2->L2_ITEM, SL2->L2_PRODUTO })
 					Case ACV->ACV_CATEGO == '000002'
 						aAdd(aPrdMaFe[2],{ SL2->L2_ITEM, SL2->L2_PRODUTO })
 				End Case
+				*/
+				aAdd(aPrdMaFe[1],{ SL2->L2_ITEM, SL2->L2_PRODUTO })
 			Else
-				aAdd(aPrdMaFe[3],{ SL2->L2_ITEM, SL2->L2_PRODUTO })
+				aAdd(aPrdMaFe[2],{ SL2->L2_ITEM, SL2->L2_PRODUTO })
 			EndIF 
 	
 			SL2->(DbSkip())
@@ -832,7 +838,7 @@ Funcao para impressao de Comprovante de crédito do cliente
 
 /*/
 //-------------------------------------------------------------------
-User Function SCRCRED()   
+Static Function SCRCRED()   
 
 	Local aArea 		:= GetArea()	// Guarda area atual
 	Local cTexto		:= ""			// Texto do comprovante a ser impresso
@@ -897,7 +903,7 @@ User Function SCRCRED()
 			cTexto += '<ce> CNPJ: '+ alltrim(cCgcEnt) + ' IE: '+ alltrim(cInsEnt) +'</ce>'+ Chr(13)+ Chr(10)
 			cTexto += Replicate(" ", nMaxChar) + Chr(13)+ Chr(10)
 			cTexto += Replicate("-", nMaxChar)						   + Chr(13)+ Chr(10)
-			cTexto += '<b><ce>C O M P R O V A N T E   C R E D I T O</ce></b>'		   + Chr(13)+ Chr(10)
+			cTexto += '<b><ce>COMPROVANTE DE CREDITO</ce></b>'		   + Chr(13)+ Chr(10)
 			cTexto += Replicate("-",nMaxChar) + Chr(13)+ Chr(10)
 			cTexto += Replicate(" ", nMaxChar) + Chr(13)+ Chr(10)
 			cTexto += PADC(AllTrim(cCodCli) + "/" + cCodLojCli + " - " +  AllTrim(cNomCli),nMaxChar)	+ Chr(13)+ Chr(10)
