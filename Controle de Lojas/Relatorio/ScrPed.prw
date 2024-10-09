@@ -91,11 +91,6 @@ User Function SCRPED()
 	EndIf
 
 	fCompPag()
-<<<<<<< HEAD
-
-	fPrdMadFerr()
-=======
->>>>>>> f0e877557bc629ff5af504b04e89013a78ac7e8d
 
 	If !(lValePre)
 		fPrdMadFerr()
@@ -360,15 +355,10 @@ Static Function fPrdMadFerr()
 					Case ACV->ACV_CATEGO == '000002'
 						aAdd(aPrdMaFe[2],{ SL2->L2_ITEM, SL2->L2_PRODUTO })
 				End Case
-<<<<<<< HEAD
-			Else
-				aAdd(aPrdMaFe[3],{ SL2->L2_ITEM, SL2->L2_PRODUTO })
-=======
 				*/
 				aAdd(aPrdMaFe[1],{ SL2->L2_ITEM, SL2->L2_PRODUTO })
 			Else
 				aAdd(aPrdMaFe[2],{ SL2->L2_ITEM, SL2->L2_PRODUTO })
->>>>>>> f0e877557bc629ff5af504b04e89013a78ac7e8d
 			EndIF 
 	
 			SL2->(DbSkip())
@@ -391,11 +381,7 @@ Funcao para impressao do comprovante de Retira
 /*/
 //-------------------------------------------------------------------
 Static Function fCompRet(pPos)
-<<<<<<< HEAD
-	Local cComprov := IIF(pPos == 1, 'MADEIRA', IIF(pPos == 2, 'FERRAGEM', 'SEM CATEGORIA'))
-=======
 	Local cComprov := IIF(pPos == 1, 'MADEIRA', 'DIVERSOS')
->>>>>>> f0e877557bc629ff5af504b04e89013a78ac7e8d
 	Local cMsg     := ""
 	Local nLinMsg  := 0
 	Local nY       := 0
