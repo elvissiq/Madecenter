@@ -8,43 +8,42 @@ Static cCamposSL2 := "L2_NUM;L2_EMISSAO;L2_ITEM;L2_PRODUTO;L2_DESCRI;L2_QUANT;L2
 //----------------------------------------------------------------------
 /*/{PROTHEUS.DOC} MLJF01
 FUNÇÃO MLJF01 - Tela para consulta de Historico de Vendas do Cliente
-@OWNER Bokus
 @VERSION PROTHEUS 12
-@SINCE 23/08/2024
+@SINCE 25/09/2024
 /*/
 //----------------------------------------------------------------------
 
 User Function MLJF01()
     Local aButtons := {{.F.,Nil},;
-                     {.F.,Nil},;
-                     {.F.,Nil},;
-                     {.F.,Nil},;
-                     {.F.,Nil},;
-                     {.F.,Nil},;
-                     {.F.,Nil},;
-                     {.T.,"Fechar"},;
-                     {.F.,Nil},;
-                     {.F.,Nil},;
-                     {.F.,Nil},;
-                     {.F.,Nil},;
-                     {.F.,Nil},;
-                     {.F.,NIl}}
+                       {.F.,Nil},;
+                       {.F.,Nil},;
+                       {.F.,Nil},;
+                       {.F.,Nil},;
+                       {.F.,Nil},;
+                       {.F.,Nil},;
+                       {.T.,"Fechar"},;
+                       {.F.,Nil},;
+                       {.F.,Nil},;
+                       {.F.,Nil},;
+                       {.F.,Nil},;
+                       {.F.,Nil},;
+                       {.F.,NIl}}
 
     Private oTableTMP  := Nil
     Private aFieldsTMP := {}
 
     oTableTMP  := FWTemporaryTable():New("TMP")
 
-    aAdd(aFieldsTMP,{"TMP_CLIENT","C", FWTamSX3("A1_CGC")[1]    , FWTamSX3("A1_CGC")[2]    , "Código ou CNPJ/CPF" ,"","SA1AZ0"})
-    aAdd(aFieldsTMP,{"TMP_NOMCLI","C", FWTamSX3("A1_NOME")[1]   , FWTamSX3("A1_NOME")[2]   , "Nome Cliente"       ,"",""      })
-    aAdd(aFieldsTMP,{"TMP_DTINI" ,"D", FWTamSX3("L1_EMISSAO")[1], FWTamSX3("L1_EMISSAO")[2], "Data Inicio"        ,"",""      })
-    aAdd(aFieldsTMP,{"TMP_DTFIM" ,"D", FWTamSX3("L1_EMISSAO")[1], FWTamSX3("L1_EMISSAO")[2], "Data Fim"           ,"",""      })
+    aAdd(aFieldsTMP,{"TMP_CLIENT","C", FWTamSX3("A1_CGC")[1]    , FWTamSX3("A1_CGC")[2]    , "Código ou CNPJ/CPF" ,"","XSA1"})
+    aAdd(aFieldsTMP,{"TMP_NOMCLI","C", FWTamSX3("A1_NOME")[1]   , FWTamSX3("A1_NOME")[2]   , "Nome Cliente"       ,"",""    })
+    aAdd(aFieldsTMP,{"TMP_DTINI" ,"D", FWTamSX3("L1_EMISSAO")[1], FWTamSX3("L1_EMISSAO")[2], "Data Inicio"        ,"",""    })
+    aAdd(aFieldsTMP,{"TMP_DTFIM" ,"D", FWTamSX3("L1_EMISSAO")[1], FWTamSX3("L1_EMISSAO")[2], "Data Fim"           ,"",""    })
 
     oTableTMP:SetFields(aFieldsTMP)
     oTableTMP:AddIndex("01", {"TMP_CLIENT"})
     oTableTMP:Create()
 
-    FWExecView("",'MLJF01',3,,{||.T.},,10,aButtons)
+    FWExecView("",'MLJF01',3,,{||.T.},,,aButtons)
     
     oTableTMP:Delete()
 
@@ -119,6 +118,8 @@ Static Function fBusNCli(oStrTMP)
         cRet := Alltrim((_cAlias)->A1_NOME)
     Endif 
 
+    (_cAlias)->(DBCloseArea())
+
 Return cRet
 
 /*---------------------------------------------------------------------*
@@ -153,7 +154,7 @@ Local oStrSL2  := FWFormStruct(2, 'SL2', {|cCampo| Alltrim(cCampo) $ cCamposSL2}
     oView:SetViewProperty("VIEW_SL2", "GRIDFILTER", {.T.})
 
     oView:AddUserButton( 'Consultar', 'NOTE',;
-                        {|oView| fConsulta(oView)},;
+                        {|oView| FWMsgRun(, {|| fConsulta(oView) }, "Aguarde...", "Consultando Historico")},;
                          /*cToolTip  | Comentário do botão*/,;
                          /*nShortCut | Codigo da Tecla para criação de Tecla de Atalho*/,;
                          /*aOptions  | */,;

@@ -158,6 +158,7 @@ While !FT_FEOF()
               If lMsErroAuto
               MostraErro()
               EndIf
+<<<<<<< HEAD
 			  */
 				RecLock("SB1",.F.)
 					If Len(aRegistro) == 2
@@ -169,6 +170,14 @@ While !FT_FEOF()
 						&('SB1->'+aRegistro[5,1]) := aRegistro[6,2]
 					EndIF 
 				SB1->(MSUnlock())
+=======
+			        */
+              RecLock("SB1",.F.)
+                For nY := 2 To Len(aRegistro)
+                  &('SB1->'+aRegistro[nY,1]) := aRegistro[nY,2]
+                Next
+              SB1->(MSUnlock())
+>>>>>>> f0e877557bc629ff5af504b04e89013a78ac7e8d
             EndIF 
           EndIf 
         
@@ -187,6 +196,7 @@ While !FT_FEOF()
               If lMsErroAuto
                 MostraErro()
               EndIf
+<<<<<<< HEAD
 			  */
 			  RecLock("SA1",.F.)
 				If Len(aRegistro) == 4
@@ -194,6 +204,14 @@ While !FT_FEOF()
 					&('SA1->'+aRegistro[4,1]) := aRegistro[4,2]
 				EndIF 
 			  SA1->(MSUnlock())
+=======
+			        */
+              RecLock("SA1",.F.)
+              For nY := 3 To Len(aRegistro)
+                &('SB1->'+aRegistro[nY,1]) := aRegistro[nY,2]
+              Next 
+              SA1->(MSUnlock())
+>>>>>>> f0e877557bc629ff5af504b04e89013a78ac7e8d
             EndIF
           EndIf 
         
