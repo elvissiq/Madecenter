@@ -1,40 +1,154 @@
 #Include 'Protheus.ch'
 /*/
-  @param
-  @return Não retorna nada
-  @author Totvs Nordeste (Elvis Siqueira)
-  @owner Totvs S/A
-  @version Protheus 10, Protheus 11,Protheus 12
-  @since 30/08/2024
-  @sample
-  			Ponto de Entrada chamado depois da gravação de todos os dados 
-        e da impressão do cupom fiscal na Venda Assistida e após o processamento do Job LjGrvBatch
-  @obs
-  @project
-  @menu 
+/*-----------------------------------------------------------------------
+  Função: LJ7002
+
+  Tipo: Ponto de entrada
+
+  Localização: Ponto de Entrada chamado depois da gravação de todos os
+               dados e da impressão do cupom fiscal na Venda Assistida
+               e após o processamento do Job LjGrvBatch(FRONT LOJA)
+
+  Uso: Venda Assistida
+
+  Parâmetros:
+    ExpN1	 Numérico	 Contém o tipo de operação de gravação, sendo:
+      1 - Orçamento
+      2 - Venda
+      3 - Pedido
+
+    ExpA2	 Array of Record Array de 1 dimensão contendo os dados da
+                   devolução na seguinte ordem:
+      1 - série da NF de devolução
+      2 - Número da NF de devolução
+      3 - Cliente
+      4 - Loja do cliente
+      5 - Tipo de operação (1 - troca; 2 - devolução)
+
+    ExpN3	Array of Record	Contém a origem da chamada da função, sendo:
+      1 - Genérica
+      2 - GRVBatch
+Retorno:
+Nenhum
+--------------------------------------------------------------------------
   @history
-  31/01/2024 - Desenvolvimento da Rotina.
+  07/10/2024 - Desenvolvimento da Rotina.
 /*/
 
 User Function LJ7002()
-  Local aArea  := FWGetArea()
-  Local cOpcao := cValToChar(ParamIxB[1])
+  Local aArea     := FWGetArea()
+  Local aAreaSG1  := SG1->(FWGetArea())
+  Local cOpcao    := cValToChar(ParamIxB[1])
   Local lGrvBatch := IIF(ParamIxB[3] == 2,.T.,.F.)
+  Local cNomCli   := Pad(AllTrim(Posicione("SA1",1,xFilial("SA1") + SL1->L1_CLIENTE + SL1->L1_LOJA, "A1_NOME" )),FWTamSX3("L1_NOMCLI")[1])
 
   If cOpcao == "1" .AND. !(lGrvBatch)
         
-        IF INCLUI .Or. ALTERA 
-          If ExistBlock("MLJF04")
-		   		  ExecBlock("MLJF04",.F.,.F.,{})
-		   	  EndIf
-        EndIF 
+    IF INCLUI .Or. ALTERA 
+      If ExistBlock("MLJF04")
+			  ExecBlock("MLJF04",.F.,.F.,{})
+		  EndIf
+    EndIF
+  
+  ElseIF cOpcao == '2' .AND. lGrvBatch
+    
+    dbSelectArea("SL2")
+    dbSetOrder(1)  
+    MsSeek(xFilial("SL2") + SL1->L1_NUM )
 
-        RecLock("SL1",.F.)
-          SL1->L1_NOMCLI := M->LQ_NOMCLI
-        SL1->(MsUnLock())
+    While !SL2->(Eof()) .AND. SL2->L2_FILIAL + SL2->L2_NUM == xFilial("SL2") +  SL1->L1_NUM   
       
+      dbSelectArea("SG1")
+      dbSetOrder(1)  
+      If SG1->(MsSeek(xFilial("SG1") + SL2->L2_PRODUTO ))
+          fnGrvOP()
+        SL2->(DbSkip())
+      Else
+        SL2->(DbSkip())
+      EndIf
+
+    End
+
   EndIf
 
+  RecLock("SL1",.F.)
+    SL1->L1_NOMCLI := cNomCli
+  SL1->(MsUnLock())
+
+  FWRestArea(aAreaSG1)
   FWRestArea(aArea)
   
 Return
+
+//------------------------------------------------------------------------
+/*/{PROTHEUS.DOC} fnGrvOP
+@TYPE FUNCTION fnGrvOP - Gera e Baixa a OP conforme informado no item do Pedido de Venda
+@AUTHOR TOTVS Nordeste
+@VERSION PROTHEUS 12
+@Historico
+	07/10/2024 - Desenvolvimento da Rotina (Elvis Siqueira)
+/*/
+Static Function fnGrvOP()
+  Local aVetorOP  := {}
+  Local aVetorBX  := {}
+  Local cNumOP    := ""
+  Local dData     := CToD("")
+
+  Private lMsHelpAuto := .T.
+	Private lMsErroAuto := .F.
+  
+  cNumOP := fGeraNum("C2")
+
+	aAdd(aVetorOP, {'C2_NUM'    , cNumOP                                , Nil} )
+	aAdd(aVetorOP, {'C2_ITEM'   , '01'                       					  , Nil} )
+	aAdd(aVetorOP, {'C2_SEQUEN' , '001'                      					  , Nil} )
+	aAdd(aVetorOP, {'C2_PRODUTO', SL2->L2_PRODUTO         					    , Nil} )
+	aAdd(aVetorOP, {'C2_QUANT'  , SL2->L2_QUANT        					        , Nil} )
+	aAdd(aVetorOP, {'C2_LOCAL'  , SL2->L2_LOCAL        					        , Nil} )
+	aAdd(aVetorOP, {'C2_DATPRI' , SL2->L2_EMISSAO        	   					  , Nil} )
+	aAdd(aVetorOP, {'C2_DATPRF' , SL2->L2_EMISSAO              					, Nil} )
+	aAdd(aVetorOP, {'C2_EMISSAO', SL2->L2_EMISSAO              					, Nil} )
+	aAdd(aVetorOP, {'C2_OBS'    , 'OP Gerada aut. Orc.: '+ SL2->L2_NUM 	, Nil} )
+	aAdd(aVetorOP, {'AUTEXPLODE', 'S'                        					  , Nil} )
+
+  MSExecAuto({|x, y| MATA650(x, y)}, aVetorOP, 3)
+
+	If !lMsErroAuto
+	  
+    dData := dDataBase
+    
+    aVetorBX := {;
+                {"D3_OP"		,cNumOP + '01' + '001'  	,NIL},;
+                {"D3_TM"		,"001"				            ,NIL}}
+
+    MSExecAuto({|x, y| MATA250(x, y)},aVetorBX, 3 )
+	EndIF
+
+Return
+
+/*/{Protheus.doc} fGeraNum
+	Gera o proximo numero do documento
+	@type  Static Function
+	@author Elvis Siqueira (TOTVS Recife)
+	@since 07/10/2024
+/*/
+Static Function fGeraNum(pTab)
+	Local cNum  := ""
+	Local cQry  := ""
+	Local cAPrx	:= GetNextAlias()
+
+	cQry := " SELECT MAX("+pTab+"_NUM) ULTIMO "
+	cQry += " FROM " + RetSqlName("S"+pTab)
+	cQry += " WHERE "+pTab+"_FILIAL = '" + xFilial("S"+pTab) + "' "
+	cQry := ChangeQuery(cQry)
+	dbUseArea(.T.,"TOPCONN",TcGenQry(,,cQry),cAPrx,.F.,.T.)
+
+    IF (cAPrx)->(!Eof())
+        cNum := Soma1((cAPrx)->ULTIMO)
+    Else 
+        cNum := StrZero(1,FWTamSX3(pTab+"_NUM")[1])
+    EndIF 
+    
+    (cAPrx)->(DbCloseArea())
+	
+Return cNum

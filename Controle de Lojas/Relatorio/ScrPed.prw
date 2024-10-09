@@ -90,7 +90,7 @@ User Function SCRPED()
 	EndIf
 
 	fCompPag()
-	
+
 	fPrdMadFerr()
 
 	For nY := 1 To Len(aPrdMaFe)
@@ -294,7 +294,7 @@ Static Function fCompPag()
 
 	sTexto := sTexto + '<b>Orcamento: </b>' + AllTrim(SL1->L1_NUM) + Chr(13) + Chr(10)
 	sTexto := sTexto + ' ' + Chr(13) + Chr(10)
-	sTexto := sTexto + '<b>Cliente:</b> ' +  Alltrim(cNomCli)    + Chr(13) + Chr(10)
+	sTexto := sTexto + '<b>Cliente:</b> ' +  AllTrim(SL1->L1_CLIENTE) + "-" + Alltrim(cNomCli)    + Chr(13) + Chr(10)
 	sTexto := sTexto + Replicate("-", nMaxChar)						     + Chr(13) + Chr(10) 
 	
 	sTexto := sTexto + '<b>Data:</b> ' + DtoC(dDatabase) + ' <b>Hora: </b>' +Time() + Chr(13) + Chr(10)
@@ -351,6 +351,8 @@ Static Function fPrdMadFerr()
 					Case ACV->ACV_CATEGO == '000002'
 						aAdd(aPrdMaFe[2],{ SL2->L2_ITEM, SL2->L2_PRODUTO })
 				End Case
+			Else
+				aAdd(aPrdMaFe[3],{ SL2->L2_ITEM, SL2->L2_PRODUTO })
 			EndIF 
 	
 			SL2->(DbSkip())
@@ -373,7 +375,9 @@ Funcao para impressao do comprovante de Retira
 /*/
 //-------------------------------------------------------------------
 Static Function fCompRet(pPos)
-	Local cComprov := IIF(pPos == 1, 'MADEIRA', 'FERRAGEM')
+	Local cComprov := IIF(pPos == 1, 'MADEIRA', IIF(pPos == 2, 'FERRAGEM', 'SEM CATEGORIA'))
+	Local cMsg     := ""
+	Local nLinMsg  := 0
 	Local nY       := 0
 
 	sTexto:= '<ce>'+ alltrim(cNomCom) +'</ce>'+ Chr(13)+ Chr(10)
@@ -526,7 +530,7 @@ Static Function fCompRet(pPos)
 	
 	sTexto := sTexto + '<b>Orc. Res.: </b>' + AllTrim(SL1->L1_NUM) + Chr(13) + Chr(10)
 	sTexto := sTexto + ' ' + Chr(13) + Chr(10)
-	sTexto := sTexto + '<b>Cliente:</b> ' +  Alltrim(cNomCli)    + Chr(13) + Chr(10)
+	sTexto := sTexto + '<b>Cliente:</b> ' +  AllTrim(SL1->L1_CLIENTE) + "-" + Alltrim(cNomCli)    + Chr(13) + Chr(10)
 	sTexto := sTexto + Replicate("-", nMaxChar)						     + Chr(13) + Chr(10) 
 
 	sTexto := sTexto + '<b>Data:</b> ' + DtoC(dDatabase) + ' <b>Hora: </b>' +Time() + Chr(13) + Chr(10)
@@ -534,6 +538,17 @@ Static Function fCompRet(pPos)
 	sTexto := sTexto + '<b>Caixa:</b> ' + Alltrim(SL1->L1_ESTACAO)+'<b> Operador: </b>' + Alltrim(SL1->L1_OPERADO)+' - ' +  Alltrim(cNomOpe) + Chr(13) + Chr(10)
 	sTexto := sTexto + Replicate("-", nMaxChar)						     + Chr(13) + Chr(10)
 	sTexto := sTexto + ' ' + Chr(13) + Chr(10)
+
+	If !Empty(SL1->L1_XMSGI)
+		cMsg    := SL1->L1_XMSGI
+		nLinMsg := MLCount(SL1->L1_XMSGI,nMaxChar)
+
+		For nY := 1 To nLinMsg
+			sTexto := sTexto + '<ce>' + MemoLine(cMsg,nMaxChar,nY) + '</ce>' + Chr(13) + Chr(10)
+		Next nY
+		
+		sTexto := sTexto + ' ' + Chr(13) + Chr(10)
+	EndIf
 
 	sTexto := sTexto + '<ce>' + 'Prezado(a) Cliente informamos que o prazo ' + '</ce>' + Chr(13) + Chr(10)
 	sTexto := sTexto + '<ce>' + 'para retirada da mercadoria é de 15 dias ' + '</ce>' + Chr(13) + Chr(10)
@@ -988,7 +1003,7 @@ User Function CARTEIRA(nFinanc)
 		cTexto += " " + Chr(13)+ Chr(10)
 
 		cTexto += '<ce>'+ Replicate("_", nMaxChar-7) +'</ce> '  + Chr(13) + Chr(10)
-		cTexto += '<b><ce>' + AllTrim(cNomCli) + '</b></ce>' + Chr(13) + Chr(10)
+		cTexto += '<b><ce>' + AllTrim(SL1->L1_CLIENTE) + "-" + AllTrim(cNomCli) + '</b></ce>' + Chr(13) + Chr(10)
 		cTexto += '<b><ce>' + cCGCCli + '</b></ce>' + Chr(13) + Chr(10)
 		cTexto += Replicate(" ", nMaxChar) + Chr(13)+ Chr(10)
 			

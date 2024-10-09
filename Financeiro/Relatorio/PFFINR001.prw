@@ -8,11 +8,11 @@
 #define PAD_CENTER   	2
 
 /*/{Protheus.doc} PFINR001
-Recibo de Movimento Bancário (Receber)
+Recibo de Movimento Bancário
 @type function
 @version
 @author TOTVS Nordeste
-@since 14/08/2024
+@since 07/10/2024
 @return 
 /*/
 User Function PFINR001()
@@ -75,7 +75,7 @@ oPrint:StartPage()
 			nLin += 20
 			oPrint:Box(nLin,nCol,nLin+40,nCol+540)
 			nLin += 15
-			oPrint:Say (nLin, nCol+5, "Este recebimento destina-se a: ", oFont12,,,,PAD_CENTER)
+			oPrint:Say (nLin, nCol+5, "Este recibo destina-se a: ", oFont12,,,,PAD_CENTER)
 			nLin += 15
 			oPrint:Say (nLin, nCol+12, E5_HISTOR, oFont12,,,,PAD_CENTER)
 
