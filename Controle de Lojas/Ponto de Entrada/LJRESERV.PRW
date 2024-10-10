@@ -130,16 +130,17 @@ Selecao do "ARMAZEM" (Local de Estoque) relacionado a loja onde serao reservados
 @return return_type, return_description
 /*/
 Static Function fReserv()
-  Local nX          := 0
+  	Local nX          := 0
 	Local nY          := 0
 	Local nZ          := 0
-  Local aEstoqBKP   := aClone(aEstoque)
+  	Local aEstoqBKP   := aClone(aEstoque)
 	Local cItem       := ""
 	Local cProduto    := ""
 	Local lTemEstoque := .T.
 	Local aPrdSemEst  := {} //Produtos sem estoque
 	Local cMsg        := ""
 	Local cArmazem    := "01"
+	Local lLibEstNeg  := (SuperGetMV("MV_ESTNEG",.F.,"N") == "S")
 
     //Efetua a reserva dos produtos
 		For nX:=1 To Len(aProdutos)
@@ -169,7 +170,7 @@ Static Function fReserv()
 
 					Next nZ
 
-					If lTemEstoque
+					If lTemEstoque .OR. lLibEstNeg
 						aEstoque[nY][1] := .T. //Seleciona
 						Exit
 					EndIf
@@ -185,7 +186,7 @@ Static Function fReserv()
 		Next nX
 
 		//Se nao tem estoque suficiente para reservar todos os produtos, entao aborta todas as reservas
-		If Len(aPrdSemEst) > 0
+		If Len(aPrdSemEst) > 0 .AND. !(lLibEstNeg)
 			cMsg := "Não existe estoque suficiente para o(s) seguinte(s) produto(s):" + Chr(13) + Chr(10) + Chr(13) + Chr(10)
 			For nX:=1 To Len(aPrdSemEst)
 				cMsg += aPrdSemEst[nX] + Chr(13) + Chr(10)

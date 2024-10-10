@@ -1,4 +1,6 @@
 #Include 'Protheus.ch'
+#Include "TOPCONN.ch"
+
 /*/
 /*-----------------------------------------------------------------------
   Função: LJ7002
@@ -32,7 +34,7 @@ Retorno:
 Nenhum
 --------------------------------------------------------------------------
   @history
-  07/10/2024 - Desenvolvimento da Rotina.
+  10/10/2024 - Desenvolvimento da Rotina.
 /*/
 
 User Function LJ7002()
@@ -41,6 +43,13 @@ User Function LJ7002()
   Local cOpcao    := cValToChar(ParamIxB[1])
   Local lGrvBatch := IIF(ParamIxB[3] == 2,.T.,.F.)
   Local cNomCli   := Pad(AllTrim(Posicione("SA1",1,xFilial("SA1") + SL1->L1_CLIENTE + SL1->L1_LOJA, "A1_NOME" )),FWTamSX3("L1_NOMCLI")[1])
+  Local aBankBXCH := FormatIn(SuperGetMV("MV_XBANKCH",.F.,""),"/")
+  Local aBXTitCH  := {}
+  Local cQry      := ""
+  Local _cAlias   := GetNextAlias()
+
+  Private lMsHelpAuto := .T.
+	Private lMsErroAuto := .F.
 
   If cOpcao == "1" .AND. !(lGrvBatch)
         
@@ -52,6 +61,46 @@ User Function LJ7002()
   
   ElseIF cOpcao == '2' .AND. lGrvBatch
     
+    //================================================================
+    // Baixa do título do tipo CH 
+    //================================================================
+    cQry := " SELECT * FROM " + RetSQLName('SE1') + " "
+    cQry += " WHERE D_E_L_E_T_ <> '*' "
+    cQry += "   AND E1_FILIAL  = " + xFilial("SE1") + " "
+    cQry += "   AND E1_PREFIXO = " + SL1->L1_SERIE + " "
+    cQry += "   AND E1_NUM     = " + SL1->L1_DOC + " "
+    cQry += "   AND E1_TIPO    = 'CH' "
+    cQuery := ChangeQuery(cQry)
+    TCQuery cQry ALIAS (_cAlias) NEW
+    
+    While (_cAlias)->(!Eof()) .AND. !Empty(aBankBXCH)
+      
+      aAdd(aBXTitCH,{"E1_PREFIXO"  , (_cAlias)->E1_PREFIXO       ,Nil    })
+      aAdd(aBXTitCH,{"E1_NUM"      , (_cAlias)->E1_NUM           ,Nil    })
+      aAdd(aBXTitCH,{"E1_PARCELA"  , (_cAlias)->E1_PARCELA       ,Nil    })
+      aAdd(aBXTitCH,{"E1_TIPO"     , (_cAlias)->E1_TIPO          ,Nil    })
+      aAdd(aBXTitCH,{"AUTMOTBX"    , "NOR"                       ,Nil    })
+      aAdd(aBXTitCH,{"AUTBANCO"    , aBankBXCH[1]                ,Nil    })
+      aAdd(aBXTitCH,{"AUTAGENCIA"  , aBankBXCH[2]                ,Nil    })
+      aAdd(aBXTitCH,{"AUTCONTA"    , aBankBXCH[3]                ,Nil    })
+      aAdd(aBXTitCH,{"AUTDTBAIXA"  , SToD((_cAlias)->E1_EMISSAO) ,Nil    })
+      aAdd(aBXTitCH,{"AUTDTCREDITO", SToD((_cAlias)->E1_EMISSAO) ,Nil    })
+      aAdd(aBXTitCH,{"AUTHIST"     , "Baixa automatica CH"       ,Nil    })
+      aAdd(aBXTitCH,{"AUTJUROS"    , 0                           ,Nil,.T.})
+      aAdd(aBXTitCH,{"AUTVALREC"   , (_cAlias)->E1_SALDO         ,Nil    })    
+
+      lMsErroAuto:= .F. 
+      MSExecAuto({|x,y| FINA070(x,y)},aBXTitCH,3)
+    
+    (_cAlias)->(DBSkip())
+    End
+
+    (_cAlias)->(DBCloseArea())
+    //================================================================
+
+    //================================================================
+    // Gera OP para produtos que possuem Estrutura 
+    //================================================================
     dbSelectArea("SL2")
     dbSetOrder(1)  
     MsSeek(xFilial("SL2") + SL1->L1_NUM )
@@ -70,6 +119,7 @@ User Function LJ7002()
     End
 
   EndIf
+  //================================================================
 
   RecLock("SL1",.F.)
     SL1->L1_NOMCLI := cNomCli
@@ -93,9 +143,6 @@ Static Function fnGrvOP()
   Local aVetorBX  := {}
   Local cNumOP    := ""
   Local dData     := CToD("")
-
-  Private lMsHelpAuto := .T.
-	Private lMsErroAuto := .F.
   
   cNumOP := fGeraNum("C2")
 
@@ -111,6 +158,7 @@ Static Function fnGrvOP()
 	aAdd(aVetorOP, {'C2_OBS'    , 'OP Gerada aut. Orc.: '+ SL2->L2_NUM 	, Nil} )
 	aAdd(aVetorOP, {'AUTEXPLODE', 'S'                        					  , Nil} )
 
+  lMsErroAuto:= .F. 
   MSExecAuto({|x, y| MATA650(x, y)}, aVetorOP, 3)
 
 	If !lMsErroAuto

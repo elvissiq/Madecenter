@@ -11,9 +11,12 @@
 
 User Function LJ7023()
         Local lRet := .F.
+        Local cFormaPg := Upper(PARAMIXB[1])
         
         IF LjProfile(3)
                 lRet := .T.
+        ElseIF cFormaPg $("BOLETO/CARTEIRA")
+                lRet := .T.  
         EndIF 
 
 Return lRet
