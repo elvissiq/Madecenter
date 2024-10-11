@@ -32,30 +32,31 @@ User Function MLJF06()
   Private aFields1 := {}
   Private aFields2 := {}
 
-  aAdd(aFields1,{"T1_CLIENT","C", FWTamSX3("A1_CGC")[1]    , FWTamSX3("A1_CGC")[2]    , "Código ou CNPJ/CPF" ,"","XSA1"})
-  aAdd(aFields1,{"T1_NOMCLI","C", FWTamSX3("A1_NOME")[1]   , FWTamSX3("A1_NOME")[2]   , "Nome Cliente"       ,"",""    })
+  aAdd(aFields1,{"T1_CLIENT","C", FWTamSX3("A1_CGC")[1]    , FWTamSX3("A1_CGC")[2]    , "Código ou CNPJ/CPF" ,"","XSA1",Nil})
+  aAdd(aFields1,{"T1_NOMCLI","C", FWTamSX3("A1_NOME")[1]   , FWTamSX3("A1_NOME")[2]   , "Nome Cliente"       ,"","",Nil    })
+  aAdd(aFields1,{"T1_TIPO"  ,"C", 1                        , 0                        , "Tipo"               ,"","","C=Credito Correntista;D=Credito Devolucao" })
   
   oTabTMP1:SetFields(aFields1)
   oTabTMP1:AddIndex("01", {"T1_CLIENT"})
   oTabTMP1:Create()
 
-  aAdd(aFields2,{"T2_LEGEND"  ,"C", 50                        , 0                         , "Status"        ,"@BMP",""})
-  aAdd(aFields2,{"T2_FILIAL"  ,"C", FWTamSX3("E1_FILIAL")[1]  , FWTamSX3("E1_FILIAL")[2]  , "Cod. Filial"   ,"",""})
-  aAdd(aFields2,{"T2_NOMFIL"  ,"C", 50                        , 0                         , "Nome Filial"   ,"",""})
-  aAdd(aFields2,{"T2_PREFIXO" ,"C", FWTamSX3("E1_PREFIXO")[1] , FWTamSX3("E1_PREFIXO")[2] , "Prefixo"       ,"",""})
-  aAdd(aFields2,{"T2_NUM"     ,"C", FWTamSX3("E1_NUM")[1]     , FWTamSX3("E1_NUM")[2]     , "Num. Credito"  ,"",""})
-  aAdd(aFields2,{"T2_VALOR"   ,"N", FWTamSX3("E1_VALOR")[1]   , FWTamSX3("E1_VALOR")[2]   , "Valor"         ,PesqPict("SE1", "E1_VALOR"),""})
-  aAdd(aFields2,{"T2_SALDO"   ,"N", FWTamSX3("E1_SALDO")[1]   , FWTamSX3("E1_SALDO")[2]   , "Saldo"         ,PesqPict("SE1", "E1_SALDO"),""})
-  aAdd(aFields2,{"T2_EMISSAO" ,"D", FWTamSX3("E1_EMISSAO")[1] , FWTamSX3("E1_EMISSAO")[2] , "Emissao"       ,"",""})
-  aAdd(aFields2,{"T2_VENCREA" ,"D", FWTamSX3("E1_VENCREA")[1] , FWTamSX3("E1_VENCREA")[2] , "Validade"      ,"",""})
-  aAdd(aFields2,{"T2_CODCLI"  ,"C", FWTamSX3("A1_COD")[1]     , FWTamSX3("A1_COD")[2]     , "Cod. Cliente"  ,"",""})
-  aAdd(aFields2,{"T2_NOMCLI"  ,"C", FWTamSX3("A1_NOME")[1]    , FWTamSX3("A1_NOME")[2]    , "Nome Cliente"  ,"",""})
+  aAdd(aFields2,{"T2_LEGEND"  ,"C", 50                        , 0                         , "Status"        ,"@BMP","",Nil})
+  aAdd(aFields2,{"T2_FILIAL"  ,"C", FWTamSX3("E1_FILIAL")[1]  , FWTamSX3("E1_FILIAL")[2]  , "Cod. Filial"   ,"","",Nil})
+  aAdd(aFields2,{"T2_NOMFIL"  ,"C", 50                        , 0                         , "Nome Filial"   ,"","",Nil})
+  aAdd(aFields2,{"T2_PREFIXO" ,"C", FWTamSX3("E1_PREFIXO")[1] , FWTamSX3("E1_PREFIXO")[2] , "Prefixo"       ,"","",Nil})
+  aAdd(aFields2,{"T2_NUM"     ,"C", FWTamSX3("E1_NUM")[1]     , FWTamSX3("E1_NUM")[2]     , "Num. Credito"  ,"","",Nil})
+  aAdd(aFields2,{"T2_VALOR"   ,"N", FWTamSX3("E1_VALOR")[1]   , FWTamSX3("E1_VALOR")[2]   , "Valor"         ,PesqPict("SE1", "E1_VALOR"),"",Nil})
+  aAdd(aFields2,{"T2_SALDO"   ,"N", FWTamSX3("E1_SALDO")[1]   , FWTamSX3("E1_SALDO")[2]   , "Saldo"         ,PesqPict("SE1", "E1_SALDO"),"",Nil})
+  aAdd(aFields2,{"T2_EMISSAO" ,"D", FWTamSX3("E1_EMISSAO")[1] , FWTamSX3("E1_EMISSAO")[2] , "Emissao"       ,"","",Nil})
+  aAdd(aFields2,{"T2_VENCREA" ,"D", FWTamSX3("E1_VENCREA")[1] , FWTamSX3("E1_VENCREA")[2] , "Validade"      ,"","",Nil})
+  aAdd(aFields2,{"T2_CODCLI"  ,"C", FWTamSX3("A1_COD")[1]     , FWTamSX3("A1_COD")[2]     , "Cod. Cliente"  ,"","",Nil})
+  aAdd(aFields2,{"T2_NOMCLI"  ,"C", FWTamSX3("A1_NOME")[1]    , FWTamSX3("A1_NOME")[2]    , "Nome Cliente"  ,"","",Nil})
   
   oTabTMP2:SetFields(aFields2)
   oTabTMP2:AddIndex("01", {"T2_FILIAL","T2_PREFIXO","T2_NUM"})
   oTabTMP2:Create()
 
-  FWExecView("",'MLJF06',3,,{||.T.},,,aButtons)
+  FWExecView("",'MLJF06',4,,{||.T.},,,aButtons)
   
   oTabTMP1:Delete()
   oTabTMP2:Delete()
@@ -74,6 +75,7 @@ Static Function ModelDef()
   Local oStrTMP2 := fnM01TMP('2')
 
   oStrTMP1:AddTrigger("T1_CLIENT", "T1_NOMCLI" ,{||.T.},{|oStrTMP1| fBusNCli(oStrTMP1) })
+  oStrTMP1:AddTrigger("T1_CLIENT", "T1_TIPO"   ,{||.T.},{|| "C" })
 
   oModel := MPFormModel():New('MLJF06M',/*bPre*/,/*bPost*/,/*bCommit*/,/*bCancel*/)
   oModel:AddFields('T1MASTER',/*cOwner*/,oStrTMP1,/*bPre*/,/*bPos*/,/*bLoad*/)
@@ -101,16 +103,17 @@ Static Function fnM01TMP(cTab)
   Local cField := "aFields"+cTab
   Local nId  
 
-  oStruct:AddTable(cTab,{},"Tabela "+cTab)
+  oStruct:AddTable("T"+cTab,{},"Tabela "+cTab)
 
   For nId := 1 To Len(&(cField))
-      oStruct:AddField(&(cField)[nId][5]; 
-                      ,&(cField)[nId][5]; 
-                      ,&(cField)[nId][1]; 
-                      ,&(cField)[nId][2];
-                      ,&(cField)[nId][3];
-                      ,&(cField)[nId][4];
-                      ,Nil,Nil,{},.F.,,.F.,.F.,.F.)
+
+    oStruct:AddField(&(cField)[nId][5]; 
+                    ,&(cField)[nId][5]; 
+                    ,&(cField)[nId][1]; 
+                    ,&(cField)[nId][2];
+                    ,&(cField)[nId][3];
+                    ,&(cField)[nId][4];
+                    ,Nil,Nil,{},.F.,,.F.,.F.,.F.)
   Next nId
 
 Return oStruct
@@ -200,13 +203,17 @@ Return oView
 Static Function fnV01TMP(cTab)
   Local oViewTMP := FWFormViewStruct():New() 
   Local cField := "aFields"+cTab
-  Local cCampLib := "T1_CLIENT"
+  Local cCampLib := "T1_CLIENT/T1_TIPO"
   Local lLibEdit := .F.
+  Local aCombo := {}
   Local nId
   
   For nId := 1 To Len(&(cField))
 
     lLibEdit := IIF(&(cField)[nId][1] $ (cCampLib),.T.,.F.)
+    If ValType(&(cField)[nId][8]) == "C"
+      aCombo := StrTokArr(&(cField)[nId][8],";")
+    EndIF 
 
     oViewTMP:AddField(&(cField)[nId][1],;       // 01 = Nome do Campo
                         StrZero(nId,2),;        // 02 = Ordem
@@ -220,7 +227,7 @@ Static Function fnV01TMP(cTab)
                         lLibEdit,;              // 10 = Indica se o campo é alterável
                         Nil,;                   // 11 = Pasta do Campo
                         Nil,;                   // 12 = Agrupamnento do campo
-                        Nil,;                   // 13 = Lista de valores permitido do campo (Combo)
+                        aCombo,;                // 13 = Lista de valores permitido do campo (Combo)
                         Nil,;                   // 14 = Tamanho máximo da opção do combo
                         Nil,;                   // 15 = Inicializador de Browse
                         .F.,;                   // 16 = Indica se o campo é virtual (.T. ou .F.)
@@ -239,10 +246,10 @@ Static Function fConsulta(oView)
     Local oModel := FWModelActive() 
     Local oModelTMP1 := oModel:GetModel("T1MASTER")
     Local oModelTMP2 := oModel:GetModel("T2DETAIL")
-    Local _cAlias   := GetNextAlias()
-    Local cQry      := ""
-    Local nLinQry   := 0
-    
+    Local _cAlias    := GetNextAlias()
+    Local cQry       := ""
+    Local nLinQry    := 0
+
     oModel:GetModel('CALCTMP2'):LoadValue("VALOR", 0)
     oModel:GetModel('CALCTMP2'):LoadValue("SALDO", 0)
 
@@ -253,7 +260,11 @@ Static Function fConsulta(oView)
     cQry += " INNER JOIN SYS_COMPANY SM0 ON SM0.M0_CODFIL = SE1.E1_FILIAL "
     cQry += " INNER JOIN "+RetSQLName("SA1")+" SA1 ON SA1.A1_COD = SE1.E1_CLIENTE "
     cQry += " WHERE SE1.D_E_L_E_T_ <> '*' "
-    cQry += " 	AND SE1.E1_ORIGEM = 'STIPOSMA' "
+    If oModelTMP1:GetValue("T1_TIPO") == "C" 
+      cQry += " 	AND SE1.E1_ORIGEM = 'STIPOSMA' "
+    Else
+      cQry += " 	AND SE1.E1_ORIGEM <> 'STIPOSMA' "
+    EndIF 
     cQry += " 	AND SE1.E1_TIPO   = 'NCC' "
     cQry += " 	AND SM0.D_E_L_E_T_ <> '*' "
     cQry += " 	AND SA1.D_E_L_E_T_ <> '*' "
@@ -264,7 +275,7 @@ Static Function fConsulta(oView)
 
     oModelTMP2:ClearData(.T.)
 
-    While !(_cAlias)->(EOF())
+    While (_cAlias)->(!Eof())
         
         nLinQry++
         IF nLinQry > 1
@@ -301,7 +312,7 @@ Static Function fConsulta(oView)
     oModelTMP2:GoLine(1)
     oView:Refresh('VIEW_TMP2')
     oView:SetNoDeleteLine('VIEW_TMP2')
-    oView:SetNoInsertLine('VIEW_TMP2')
+    //oView:SetNoInsertLine('VIEW_TMP2')
     
 Return
 
@@ -313,12 +324,29 @@ Return
 Static Function fOrcamento()
   Local aArea    := FWGetArea()
   Local aAreaSL1 := SL1->(FWGetArea())
+  Local oModel := FWModelActive() 
+  Local oModelTMP1 := oModel:GetModel("T1MASTER")
+  Local cChave := ""
 
-  DBSelectArea("SL1")
-  SL1->(DBSetOrder(2))
-  IF SL1->(MSSeek(xFilial("SL1") + T2->T2_PREFIXO + T2->T2_NUM ))
-    Lj7Venda("SL1", Recno(), 2)
+  IF oModelTMP1:GetValue("T1_TIPO") == "C" 
+    cChave := T2->T2_PREFIXO + T2->T2_NUM
+  Else
+    DBSelectArea("SD1")
+    SD1->(DBSetOrder(1))
+    IF SD1->(MSSeek(xFilial("SD1") + T2->T2_NUM + T2->T2_PREFIXO ))
+      cChave := SD1->D1_SERIORI + SD1->D1_NFORI
+    EndIF 
   EndIF 
+
+  If !Empty(cChave)
+    DBSelectArea("SL1")
+    SL1->(DBSetOrder(2))
+    IF SL1->(MSSeek(xFilial("SL1") + cChave ))
+      Lj7Venda("SL1", Recno(), 2)
+    EndIF
+  Else
+    FWAlertInfo("Nenhum orçamento encontrado para esse crédito.","Consulta Orçamento")
+  EndIF
 
   FWRestArea(aAreaSL1)
   FWRestArea(aArea)
