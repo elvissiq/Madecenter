@@ -24,11 +24,7 @@ User Function LJ7061()
 	DeFault lNota := .F.
 
 	For nY := 1 To Len(aCOLS)
-<<<<<<< HEAD
-		IF nY != N .And. !(aCOLS[N][Len(aCOLS[N])])
-=======
 		IF nY != N .And. (aCOLS[N][Len(aCOLS[N])])
->>>>>>> f0e877557bc629ff5af504b04e89013a78ac7e8d
 			IF aCOLS[nY][nPosPro] == aCOLS[N][nPosPro]
 				FWAlertWarning("O Produto " + AllTrim(cCodPro) + " - " + cDescPr +", já foi inserido anteriormente.","Produto")
 				lRet := .F.

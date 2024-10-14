@@ -29,6 +29,9 @@ User Function SCRRPS()
 	Local nVales		:= 0
 	Local nFinanc		:= 0
 	Local nCredito		:= 0
+	Local nCarteir		:= 0
+	Local nDeposit		:= 0
+	Local nPIXManu		:= 0
 	Local nOutros		:= 0
 	Local nAbtoPCC		:= 0
 	Local nAbtoISS		:= 0
@@ -80,6 +83,8 @@ User Function SCRRPS()
 	Local nLinMsg  		:= 0
 	Local nY       		:= 0
 
+	Private aVlrFormas		:= SCRPRetPgt()	// Resgata os valores de cada forma de pagamento
+
 	If FindClass("FWSM0Util") //Proteção, para ambiente com RPO Ctree essa função não existe
 		aFilCodMun	:= FWSM0Util():GetSM0Data( cEmpAnt, cFilAnt , { "M0_CODMUN","M0_CIDCOB" } )
 	EndIf
@@ -111,15 +116,20 @@ User Function SCRRPS()
 	sTexto:= sTexto+ 'Qtd             VlrUnit                 VlrTot'+Chr(13)+Chr(10)
 	sTexto:= sTexto+'-----------------------------------------------'+Chr(13)+Chr(10)
 	cOrcam		:= SL1->L1_NUM
-	nDinheir	:= (nFatorRPS * SL1->L1_DINHEIR)
-	nCheques	:= (nFatorRPS * SL1->L1_CHEQUES)
-	nCartaoC 	:= (nFatorRPS * SL1->L1_CARTAO)
-	nCartaoD 	:= (nFatorRPS * SL1->L1_VLRDEBI)
-	nConveni	:= (nFatorRPS * SL1->L1_CONVENI)
-	nVales  	:= (nFatorRPS * SL1->L1_VALES)
-	nFinanc		:= (nFatorRPS * SL1->L1_FINANC)
-	nCredito	:= (nFatorRPS * SL1->L1_CREDITO)
-	nOutros		:= (nFatorRPS * SL1->L1_OUTROS)
+	nDinheir	:= (nFatorRes * aVlrFormas[01][02] )
+	nCheques	:= (nFatorRes * aVlrFormas[02][02] )
+	nCartaoC 	:= (nFatorRes * aVlrFormas[03][02] )
+	nCartaoD 	:= (nFatorRes * aVlrFormas[04][02] )
+	nPIX	 	:= (nFatorRes * aVlrFormas[05][02] )
+	nCartDig 	:= (nFatorRes * aVlrFormas[06][02] )
+	nFinanc		:= (nFatorRes * aVlrFormas[07][02] )
+	nConveni	:= (nFatorRes * aVlrFormas[08][02] )
+	nVales  	:= (nFatorRes * aVlrFormas[09][02] )
+	nCredito	:= (nFatorRes * aVlrFormas[10][02] )
+	nCarteir	:= (nFatorRes * aVlrFormas[11][02] )
+	nDeposit	:= (nFatorRes * aVlrFormas[12][02] )
+	nPIXManu	:= (nFatorRes * aVlrFormas[13][02] )
+	nOutros		:= (nFatorRes * aVlrFormas[14][02] )
 	nAbtoPCC	:= (nFatorRPS * SL1->L1_ABTOPCC)
 	nAbtoISS	:= RetAbatIss()	//Abatimento de ISS
 
@@ -180,28 +190,46 @@ User Function SCRRPS()
 	sTexto	:= sTexto + 'TOTAL                          ' + Str(nVlrTot, 15, 2) + Chr(13) + Chr(10)
 
 	If nDinheir > 0 
-		sTexto := sTexto + 'DINHEIRO' + '                       ' + Str(nDinheir, 15, 2) + Chr(13) + Chr(10)
+		sTexto := sTexto + 'DINHEIRO' + '                   ' + Str( nDinheir , 15, 2) + ' (+)' + Chr(13) + Chr(10)
 	EndIf
 	If nCheques > 0 
-		sTexto := sTexto + 'CHEQUE' + '                         ' + Str(nCheques, 15, 2) + Chr(13) + Chr(10)
+		sTexto := sTexto + 'CHEQUE' + '                     ' + Str(nCheques, 15, 2) + ' (+)' +  Chr(13) + Chr(10)
 	EndIf
 	If nCartaoC > 0 
-		sTexto := sTexto + 'CARTAO CRED' + '                    ' + Str(nCartaoC, 15, 2) + Chr(13) + Chr(10)
+		sTexto := sTexto + 'CARTAO CRED' + '                ' + Str(nCartaoC, 15, 2) + ' (+)' +  Chr(13) + Chr(10)
 	EndIf
 	If nCartaoD > 0 
-		sTexto := sTexto + 'CARTAO DEB' + '                      ' + Str(nCartaoD, 15, 2) + ' (+)' + Chr(13) + Chr(10)
+		sTexto := sTexto + 'CARTAO DEB' + '                 ' + Str(nCartaoD, 15, 2) + ' (+)' + Chr(13) + Chr(10)
+	EndIf
+	If nPIX > 0 
+		sTexto := sTexto + 'PIX' + '                        ' + Str(nPIX, 15, 2) + ' (+)' + Chr(13) + Chr(10)
+	EndIf
+	If nCartDig > 0 
+		sTexto := sTexto + 'CARTEIRA DIGITAL' + '           ' + Str(nCartDig, 15, 2) + ' (+)' + Chr(13) + Chr(10)
 	EndIf
 	If nConveni > 0 
-		sTexto := sTexto + 'CONVENIO' + '                        ' + Str(nConveni, 15, 2) + Chr(13) + Chr(10)
+		sTexto := sTexto + 'CONVENIO' + '                   ' + Str(nConveni, 15, 2) + ' (+)' + Chr(13) + Chr(10)
 	EndIf
 	If nVales > 0 
-		sTexto := sTexto + 'VALES' + '                           ' + Str(nVales, 15, 2) + Chr(13) + Chr(10)
+		sTexto := sTexto + 'VALES' + '                      ' + Str(nVales, 15, 2) + ' (+)' + Chr(13) + Chr(10)
 	EndIf
 	If nFinanc > 0 
-		sTexto := sTexto + 'FINANCIADO' + '                      ' + Str(nFinanc, 15, 2) + Chr(13) + Chr(10)
+		sTexto := sTexto + 'BOLETO' + '                     ' + Str(nFinanc, 15, 2) + ' (+)' + Chr(13) + Chr(10)
 	EndIf  
 	If nCredito > 0
-		sTexto := sTexto + 'CREDITO ' + '                       ' + Str(nCredito, 15, 2) + Chr(13) + Chr(10)
+		sTexto := sTexto + 'CREDITO ' + '                   ' + Str(nCredito, 15, 2) + ' (+)' + Chr(13) + Chr(10)
+	EndIf
+	If nCarteir > 0
+		sTexto := sTexto + 'CARTEIRA ' + '                  ' + Str(nCarteir, 15, 2) + ' (+)' + Chr(13) + Chr(10)
+	EndIf
+	If nDeposit > 0
+		sTexto := sTexto + 'DEP. BANCARIO ' + '             ' + Str(nDeposit, 15, 2) + ' (+)' + Chr(13) + Chr(10)
+	EndIf
+	If nPIXManu > 0
+		sTexto := sTexto + 'PIX Manual ' + '                ' + Str(nPIXManu, 15, 2) + ' (+)' + Chr(13) + Chr(10)
+	EndIf
+	If nOutros > 0 
+		sTexto := sTexto + 'OUTROS' + '                      ' + Str(nOutros, 15, 2) + ' (+)' + Chr(13) + Chr(10)
 	EndIf			
 	If nAbtoPCC > 0
 		sTexto := sTexto + 'RETENCAO PCC'	+ '                   ' + Str(nAbtoPCC, 15, 2) + Chr(13) + Chr(10)
@@ -235,6 +263,8 @@ User Function SCRRPS()
 		
 		sTexto := sTexto + ' ' + Chr(13) + Chr(10)
 	EndIf
+
+	STWManagReportPrint(sTexto,1) //Envia comando para a Impressora
 
 Return sTexto
 
@@ -299,3 +329,70 @@ If SL2->L2_VALISS > 0
 EndIf
 
 Return lRet
+
+/*/{Protheus.doc} SCRPRetPgt
+Retorna os valores de cada Forma de Pagamento da venda conforma os valores gravados na SL4
+@type  Static Function
+@author joao.marcos
+@since 26/09/2023
+@version version
+@return aVlrFormas, arrray, array com os valores de cada Forma de Pagamento
+/*/
+Static Function SCRPRetPgt()
+Local aAreaSL4		:= SL4->(GetArea())
+Local aVlrFormas	:= {{"R$",0},;	// 01
+						{"CH",0},;	// 02
+						{"CC",0},;	// 03
+						{"CD",0},;	// 04
+						{"PX",0},;	// 05
+						{"PD",0},;	// 06
+						{"FI",0},;	// 07
+						{"CO",0},;	// 08
+						{"VA",0},;	// 09
+						{"CR",0},;	// 10
+						{"CA",0},;	// 11
+						{"DB",0},;	// 12
+						{"PI",0},;	// 13
+						{"OUTRO",0}} // 14
+
+SL4->(dbSetOrder(1))
+If SL4->(dbSeek(SL1->L1_FILIAL + SL1->L1_NUM))
+	While SL4->(!EOF()) .AND. SL4->L4_FILIAL == SL1->L1_FILIAL .AND. SL4->L4_NUM == SL1->L1_NUM
+		Do Case
+			Case AllTrim(SL4->L4_FORMA) == "R$"
+				aVlrFormas[01][02] += SL4->L4_VALOR
+			Case AllTrim(SL4->L4_FORMA) == "CH"
+				aVlrFormas[02][02] += SL4->L4_VALOR
+			Case AllTrim(SL4->L4_FORMA) == "CC"
+				aVlrFormas[03][02] += SL4->L4_VALOR
+			Case AllTrim(SL4->L4_FORMA) == "CD"
+				aVlrFormas[04][02] += SL4->L4_VALOR
+			Case AllTrim(SL4->L4_FORMA) == "PX"
+				aVlrFormas[05][02] += SL4->L4_VALOR
+			Case AllTrim(SL4->L4_FORMA) == "PD"
+				aVlrFormas[06][02] += SL4->L4_VALOR
+			Case AllTrim(SL4->L4_FORMA) == "FI"
+				aVlrFormas[07][02] += SL4->L4_VALOR
+			Case AllTrim(SL4->L4_FORMA) == "CO"
+				aVlrFormas[08][02] += SL4->L4_VALOR
+			Case AllTrim(SL4->L4_FORMA) == "VA"
+				aVlrFormas[09][02] += SL4->L4_VALOR	
+			Case AllTrim(SL4->L4_FORMA) == "CR"
+				aVlrFormas[10][02] += SL4->L4_VALOR
+			Case AllTrim(SL4->L4_FORMA) == "CA"
+				aVlrFormas[11][02] += SL4->L4_VALOR
+			Case AllTrim(SL4->L4_FORMA) == "DB"
+				aVlrFormas[12][02] += SL4->L4_VALOR
+			Case AllTrim(SL4->L4_FORMA) == "PI"
+				aVlrFormas[13][02] += SL4->L4_VALOR
+			Otherwise
+				aVlrFormas[14][02] += SL4->L4_VALOR	
+		EndCase
+
+		SL4->(dbSkip())
+	EndDo
+EndIf
+
+RestArea(aAreaSL4)
+	
+Return aVlrFormas

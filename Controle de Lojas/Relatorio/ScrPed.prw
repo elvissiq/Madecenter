@@ -71,6 +71,7 @@ User Function SCRPED()
 	Private cTxImp        	:= ""
 	Private aPrdMaFe     	:= {}
 	Private lValePre        := !(Empty(SL2->L2_VALEPRE))
+	Private aVlrFormas		:= SCRPRetPgt()	// Resgata os valores de cada forma de pagamento
 
 	If ValType(PARAMIXB) == "A" .AND. Len(PARAMIXB) > 0  
 		If ValType(PARAMIXB[1]) == "A" .AND. Len(PARAMIXB[1]) > 0
@@ -120,7 +121,6 @@ Funcao para impressao do comprovante de pagamento
 /*/
 //-------------------------------------------------------------------
 Static Function fCompPag() 
-	Local cDesComp := IIF(lValePre,"CREDITO","PAGAMENTO")
 
 	sTexto:= '<ce>'+ alltrim(cNomCom) +'</ce>'+ Chr(13)+ Chr(10)
 	sTexto:= sTexto +'<ce>'+ alltrim(cEndEnt) + ' - '+ alltrim(cBaiEnt) +'</ce>'+ Chr(13)+ Chr(10)
@@ -128,21 +128,26 @@ Static Function fCompPag()
 	sTexto:= sTexto +'<ce> CNPJ: '+ alltrim(cCgcEnt) + ' IE: '+ alltrim(cInsEnt) +'</ce>'+ Chr(13)+ Chr(10)
 
 	sTexto:= sTexto + Replicate("-", nMaxChar)						   + Chr(13)+ Chr(10)
-	sTexto:= sTexto + '<b><ce>COMPROVANTE DE ' + cDesComp + '</ce></b>'+ Chr(13)+ Chr(10)
+	sTexto:= sTexto + '<b><ce>COMPROVANTE DE PAGAMENTO</ce></b>'+ Chr(13)+ Chr(10)
 	sTexto:= sTexto + Replicate("-", nMaxChar)						   + Chr(13)+ Chr(10)
 	dbSelectArea("SL1")                                                                  
 	dbSetOrder(1)  
 	nOrcam		:= SL1->L1_NUM
 	nTroco		:= Iif(SL1->(FieldPos("L1_TROCO1")) > 0,(nFatorRes * SL1->L1_TROCO1), 0)
-	nDinheir	:= (nFatorRes * SL1->L1_DINHEIR)
-	nCheques	:= (nFatorRes * SL1->L1_CHEQUES)
-	nCartaoC 	:= (nFatorRes * SL1->L1_CARTAO)
-	nCartaoD 	:= (nFatorRes * SL1->L1_VLRDEBI)
-	nConveni	:= (nFatorRes * SL1->L1_CONVENI)
-	nVales  	:= (nFatorRes * SL1->L1_VALES)  	
-	nCredito	:= (nFatorRes * SL1->L1_CREDITO)  	
-	nFinanc		:= (nFatorRes * SL1->L1_FINANC)
-	nOutros		:= (nFatorRes * SL1->L1_OUTROS)
+	nDinheir	:= (nFatorRes * aVlrFormas[01][02] )
+	nCheques	:= (nFatorRes * aVlrFormas[02][02] )
+	nCartaoC 	:= (nFatorRes * aVlrFormas[03][02] )
+	nCartaoD 	:= (nFatorRes * aVlrFormas[04][02] )
+	nPIX	 	:= (nFatorRes * aVlrFormas[05][02] )
+	nCartDig 	:= (nFatorRes * aVlrFormas[06][02] )
+	nFinanc		:= (nFatorRes * aVlrFormas[07][02] )
+	nConveni	:= (nFatorRes * aVlrFormas[08][02] )
+	nVales  	:= (nFatorRes * aVlrFormas[09][02] )
+	nCredito	:= (nFatorRes * aVlrFormas[10][02] )
+	nCarteir	:= (nFatorRes * aVlrFormas[11][02] )
+	nDeposit	:= (nFatorRes * aVlrFormas[12][02] )
+	nPIXManu	:= (nFatorRes * aVlrFormas[13][02] )
+	nOutros		:= (nFatorRes * aVlrFormas[14][02] )
 	nValTot		:= 0
 	nDescTot	:= 0
 
@@ -275,20 +280,35 @@ Static Function fCompPag()
 	If nCartaoD > 0 
 		sTexto := sTexto + 'CARTAO DEB' + '                 ' + Str(nCartaoD, 15, 2) + ' (+)' + Chr(13) + Chr(10)
 	EndIf
+	If nPIX > 0 
+		sTexto := sTexto + 'PIX' + '                        ' + Str(nPIX, 15, 2) + ' (+)' + Chr(13) + Chr(10)
+	EndIf
+	If nCartDig > 0 
+		sTexto := sTexto + 'CARTEIRA DIGITAL' + '           ' + Str(nCartDig, 15, 2) + ' (+)' + Chr(13) + Chr(10)
+	EndIf
 	If nConveni > 0 
 		sTexto := sTexto + 'CONVENIO' + '                   ' + Str(nConveni, 15, 2) + ' (+)' + Chr(13) + Chr(10)
-	EndIf
-	If nOutros > 0 
-		sTexto := sTexto + 'OUTROS' + '                      ' + Str(nOutros, 15, 2) + ' (+)' + Chr(13) + Chr(10)
 	EndIf
 	If nVales > 0 
 		sTexto := sTexto + 'VALES' + '                      ' + Str(nVales, 15, 2) + ' (+)' + Chr(13) + Chr(10)
 	EndIf
 	If nFinanc > 0 
-		sTexto := sTexto + 'CARTEIRA' + '                   ' + Str(nFinanc, 15, 2) + ' (+)' + Chr(13) + Chr(10)
+		sTexto := sTexto + 'BOLETO' + '                     ' + Str(nFinanc, 15, 2) + ' (+)' + Chr(13) + Chr(10)
 	EndIf  
 	If nCredito > 0
 		sTexto := sTexto + 'CREDITO ' + '                   ' + Str(nCredito, 15, 2) + ' (+)' + Chr(13) + Chr(10)
+	EndIf
+	If nCarteir > 0
+		sTexto := sTexto + 'CARTEIRA ' + '                  ' + Str(nCarteir, 15, 2) + ' (+)' + Chr(13) + Chr(10)
+	EndIf
+	If nDeposit > 0
+		sTexto := sTexto + 'DEP. BANCARIO ' + '             ' + Str(nDeposit, 15, 2) + ' (+)' + Chr(13) + Chr(10)
+	EndIf
+	If nPIXManu > 0
+		sTexto := sTexto + 'PIX Manual ' + '                ' + Str(nPIXManu, 15, 2) + ' (+)' + Chr(13) + Chr(10)
+	EndIf
+	If nOutros > 0 
+		sTexto := sTexto + 'OUTROS' + '                      ' + Str(nOutros, 15, 2) + ' (+)' + Chr(13) + Chr(10)
 	EndIf			 
 	If lMvLjTroco .And. nTroco > 0
 		sTexto := sTexto + 'TROCO   ' + '                   ' + Str(nTroco, 15, 2) +' (-)'+ Chr(13) + Chr(10)
@@ -580,199 +600,6 @@ Return
 /*
 ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
 ±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
-±±ÉÍÍÍÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍ»±±
-±±ºPrograma  ³LjPrtPdLoc  ºAutor³Vendas CRM		     º Data ³ 10/06/11    º±±
-±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
-±±³Descri‡…o ³Rotina para impressao de Comprovante de Venda - Release 11.5³±±
-±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
-±±ºSintaxe   ³ExpL1 := LjPrtPdLoc()                       				  º±±
-±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
-±±ºRetorno   ³											                  º±±
-±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
-±±ºUso       ³SIGALOJA/SIGAFRT	                                          º±±
-±±ÈÍÍÍÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¼±±
-±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
-ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
-*/  
-User Function LjPrtPdLoc ()
-	Local lRet := .T.
-
-
-	Local wnrel   	:= "SCRPED"
-	Local cString  	:= "SL1"
-	Local cDesc1   	:= "Comprobante de Venta"
-	Local cDesc2   	:= ""
-	Local cDesc3   	:= ""
-	Local nLastKey 	:= 0 
-	Local nOrcam    := 0          
-	Local nCheques	:= 0 
-	Local nCartao	:= 0 
-	Local nConveni	:= 0 
-	Local nVales	:= 0 
-	Local nFinanc	:= 0 
-	Local nCredito	:= 0
-	Local nOutros 	:= 0 
-	Local cQuant 	:= ""
-	Local cVrUnit	:= ""
-	Local cDesconto	:= ""
-	Local cVlrItem	:= "" 
-	Local cTpEntrega:= ""
-	Local nLinha	:= 10 
-	Local nMoedaCor	:= 1						//Moeda Corrente
-	Local nDecimais := MsDecimais(nMoedaCor)	//Decimais
-
-	Private cTitulo  	:= "Comprobante de Venta"
-	Private aReturn := { "Especial", 1,"Administracion", 1, 2, 1,"",1 }
-
-	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-	//³ Envia controle para a funcao SETPRINT³
-	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-	wnrel:=SetPrint(cString,wnrel,"",@cTitulo,cDesc1,cDesc2,cDesc3,.F.)
-	If nLastKey == 27
-		Return .F.
-	Endif
-
-	SetDefault(aReturn,cString)
-
-	If nLastKey == 27
-		Return .F.
-	Endif
-	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-	//³Verifica Posicao do Formulario na Impressora³
-	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-	VerImp()
-
-	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-	//³Verificar os itens que atendem o tipo de ³
-	//³entrega de acordo com o pais.            ³
-	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-	Do Case
-		Case cPaisLoc == "COL"
-			cTpEntrega := "1|3"		
-		Case cPaisLoc == "CHI"
-			cTpEntrega := "1"
-	EndCase
-
-
-	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-	//³                                              CABECALHO                                           ³
-	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-	@ nLinha, 001 PSAY "Codigo"
-	@ nLinha, 010 PSAY "Descripcion"
-	@ nLinha, 060 PSAY "Cantidad"
-	@ nLinha, 080 PSAY "Unitario"
-	@ nLinha, 100 PSAY "Total"
-
-	nLinha++
-	@ nLinha, 001 PSAY "----------------------------------------------------------------------------------------------------------------------------"
-	nLinha++
-
-	dbSelectArea("SL1")                                                                  
-	dbSetOrder(1)  
-	nOrcam		:= SL1->L1_NUM
-	nDinheir	:= SL1->L1_DINHEIR
-	nCheques	:= SL1->L1_CHEQUES
-	nCartao 	:= SL1->L1_CARTAO
-	nConveni	:= SL1->L1_CONVENI
-	nVales  	:= SL1->L1_VALES  	
-	nFinanc		:= SL1->L1_FINANC
-	nCredito	:= SL1->L1_CREDITO
-	nOutros		:= SL1->L1_OUTROS
-			
-	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-	//³                                              ITENS		                                         ³
-	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-	dbSelectArea("SL2")
-	dbSetOrder(1)  
-	dbSeek(xFilial("SL2") + nOrcam)
-		
-	While !SL2->(Eof()) .AND. SL2->L2_FILIAL + SL2->L2_NUM == cFilAnt + nOrcam
-		If SL2->L2_ENTREGA $ cTpEntrega	
-			cQuant 		:= StrZero(SL2->L2_QUANT, 8, 3)
-			cVrUnit		:= Str(((SL2->L2_QUANT * SL2->L2_PRCTAB) / SL2->L2_QUANT), 15, nDecimais)
-			cDesconto	:= Str(SL2->L2_VALDESC, TamSx3("L2_VALDESC")[1], TamSx3("L2_VALDESC")[2])
-			cVlrItem	:= Str(Val(cVrUnit) * SL2->L2_QUANT, 15, nDecimais)
-			
-			@ nLinha, 001 PSAY SL2->L2_PRODUTO
-			@ nLinha, 010 PSAY SL2->L2_DESCRI
-			@ nLinha, 060 PSAY cQuant
-			@ nLinha, 080 PSAY AllTrim(cVrUnit)
-			@ nLinha, 100 PSAY AllTrim(cVlrItem)
-			
-			If SL2->L2_VALDESC > 0 
-				nLinha++
-				@ nLinha, 060 PSAY 'Descuento del Item: ' + Str(SL2->L2_VALDESC, 15, nDecimais)
-			EndIf
-		EndIf
-		SL2->(DbSkip())
-		nLinha++
-	Enddo                      
-
-	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-	//³                                              RODAPE		                                         ³
-	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-	nLinha++
-	If SL1->L1_DESCONTO > 0
-		@ nLinha, 080 PSAY 'Descuento Total: 	            ' + Str(SL1->L1_DESCONTO, 15, nDecimais)
-		nLinha++
-	EndIf                                                                              
-	If SL1->L1_JUROS > 0
-		@ nLinha, 080 PSAY 'Incremento Total:            	' + Transform(SL1->L1_JUROS, "@R 99.99%")
-		nLinha++
-	EndIf
-
-	nLinha++
-	@ nLinha, 001 PSAY "----------------------------------------------------------------------------------------------------------------------------"
-	nLinha++
-
-	@ nLinha, 080 PSAY 'TOTAL                         ' + Str(SL1->L1_VLRLIQ+nCredito, 15, nDecimais)
-
-	If nDinheir > 0
-		nLinha++ 
-		@ nLinha, 080 PSAY 'DINERO' + '                      	 ' + Str(nDinheir, 15, nDecimais)
-	EndIf
-	If nCheques > 0 
-		nLinha++
-		@ nLinha, 080 PSAY 'CHEQUE' + '                         ' + Str(nCheques, 15, nDecimais)
-	EndIf
-	If nCartao > 0 
-		nLinha++
-		@ nLinha, 080 PSAY 'TARJETA' + '                          ' + Str(nCartao, 15, nDecimais)
-	EndIf
-	If nConveni > 0 
-		nLinha++
-		@ nLinha, 080 PSAY 'CONVENIO' + '                        ' + Str(nConveni, 15, nDecimais)
-	EndIf
-	If nVales > 0 
-		nLinha++
-		@ nLinha, 080 PSAY 'BONOS' + '                           ' + Str(nVales, 15, nDecimais)
-	EndIf
-	If nFinanc > 0 
-		nLinha++
-		@ nLinha, 080 PSAY 'FINANCIADO' + '                      ' + Str(nFinanc, 15, nDecimais)
-	EndIf  
-	If nCredito > 0
-		nLinha++
-		@ nLinha, 080 PSAY 'CREDITO' + '                       ' + Str(nCredito, 15, nDecimais)
-	EndIf			
-				
-	nLinha++
-	@ nLinha, 001 PSAY "----------------------------------------------------------------------------------------------------------------------------"
-
-
-	Set Device To Screen
-	If aReturn[5] == 1
-		Set Printer TO
-		dbcommitAll()
-		ourspool(wnrel)
-	Endif
-	MS_FLUSH()
-
-Return lRet
-
-/*
-ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
-±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 ±±ÉÍÍÍÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍ»±±
 ±±ºFuncao    ³ VerImp   ºAutor  ³Vendas CRM		     º Data ³  10/06/11   º±±
 ±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
@@ -930,99 +757,71 @@ Static Function SCRCRED()
 	EndIf		
 	RestArea(aArea)
 
-Return cTexto   
+Return cTexto
 
-//-------------------------------------------------------------------
-/*/{Protheus.doc} CARTEIRA
-Funcao para impressao de Comprovante de Carteira (Financiado)
-@type function
-@param 
-
-@author Varejo
-@version P12
-@return cTexto, retorna texto do comprovante de credito do cliente
-
+/*/{Protheus.doc} SCRPRetPgt
+Retorna os valores de cada Forma de Pagamento da venda conforma os valores gravados na SL4
+@type  Static Function
+@author joao.marcos
+@since 26/09/2023
+@version version
+@return aVlrFormas, arrray, array com os valores de cada Forma de Pagamento
 /*/
-//-------------------------------------------------------------------
-User Function CARTEIRA(nFinanc)   
+Static Function SCRPRetPgt()
+Local aAreaSL4		:= SL4->(GetArea())
+Local aVlrFormas	:= {{"R$",0},;	// 01
+						{"CH",0},;	// 02
+						{"CC",0},;	// 03
+						{"CD",0},;	// 04
+						{"PX",0},;	// 05
+						{"PD",0},;	// 06
+						{"FI",0},;	// 07
+						{"CO",0},;	// 08
+						{"VA",0},;	// 09
+						{"CR",0},;	// 10
+						{"CA",0},;	// 11
+						{"DB",0},;	// 12
+						{"PI",0},;	// 13
+						{"OUTRO",0}} // 14
 
-	Local aArea 		:= GetArea()	// Guarda area atual
-	Local cTexto		:= ""			// Texto do comprovante a ser impresso
-	Local cPicValor     := PesqPict("SL1","L1_VLRTOT")//Picture de valor
-	Local nMaxChar 		:= 47 
-	Local aFieldSM0 	:= { ;
-							"M0_NOMECOM",;   //Posição [1]
-							"M0_ENDENT",;    //Posição [2]
-							"M0_BAIRENT",;   //Posição [3]
-							"M0_CIDENT",;    //Posição [4]
-							"M0_ESTENT",;    //Posição [5]
-							"M0_CEPENT",;    //Posição [6]
-							"M0_CGC",;       //Posição [7]
-							"M0_INSC",;      //Posição [8]
-							"M0_COMPENT",;   //Posição [9]
-							"M0_TEL";		 //Posição [10]
-							}        
-	Local aSM0Data 		:= FWSM0Util():GetSM0Data(, SL1->L1_FILIAL, aFieldSM0)
-	Local cNomCom       := aSM0Data[1,2] // Nome Comercial da Empresa
-	Local cEndEnt       := aSM0Data[2,2] // Endereço de Entrega
-	Local cBaiEnt       := aSM0Data[3,2] // Bairro de Entrega
-	Local cCidEnt       := aSM0Data[4,2] // Cidade de Entrega
-	Local cEstEnt       := aSM0Data[5,2] // Estado de Entrega
-	Local cCepEnt       := aSM0Data[6,2] // Cep de Entrega
-	Local cCgcEnt       := aSM0Data[7,2] // CNPJ 
-	Local cInsEnt       := aSM0Data[8,2] // Inscrição Estadual
-	Local cNomCli       := Posicione("SA1",1,xFILIAL("SA1")+SL1->L1_CLIENTE+SL1->L1_LOJA,"A1_NOME") //Nome do Cliente
-	Local cCGCCli       := Posicione("SA1",1,xFILIAL("SA1")+SL1->L1_CLIENTE+SL1->L1_LOJA,"A1_CGC") //CPF/CNPJ do Cliente
-	Local cTpCli        := Posicione("SA1",1,xFILIAL("SA1")+SL1->L1_CLIENTE+SL1->L1_LOJA,"A1_PESSOA") //Cliente Pessoa Física ou Juridica
-	Local cNomVen       := Posicione("SA3",1,xFilial("SA3")+SL1->L1_VEND,"A3_NOME")  // Nome do Vendedor
-	Local cNomOpe       := Posicione("SA6",1,xFilial("SA6")+SL1->L1_OPERADO,"A6_NOME")  // Nome do Operador
-	Local cMsgCart      := SuperGetMV("MV_XMSGCART",.F.,"Declaro responsabilidade e firmo o compromisso de pagamento.")
+SL4->(dbSetOrder(1))
+If SL4->(dbSeek(SL1->L1_FILIAL + SL1->L1_NUM))
+	While SL4->(!EOF()) .AND. SL4->L4_FILIAL == SL1->L1_FILIAL .AND. SL4->L4_NUM == SL1->L1_NUM
+		Do Case
+			Case AllTrim(SL4->L4_FORMA) == "R$"
+				aVlrFormas[01][02] += SL4->L4_VALOR
+			Case AllTrim(SL4->L4_FORMA) == "CH"
+				aVlrFormas[02][02] += SL4->L4_VALOR
+			Case AllTrim(SL4->L4_FORMA) == "CC"
+				aVlrFormas[03][02] += SL4->L4_VALOR
+			Case AllTrim(SL4->L4_FORMA) == "CD"
+				aVlrFormas[04][02] += SL4->L4_VALOR
+			Case AllTrim(SL4->L4_FORMA) == "PX"
+				aVlrFormas[05][02] += SL4->L4_VALOR
+			Case AllTrim(SL4->L4_FORMA) == "PD"
+				aVlrFormas[06][02] += SL4->L4_VALOR
+			Case AllTrim(SL4->L4_FORMA) == "FI"
+				aVlrFormas[07][02] += SL4->L4_VALOR
+			Case AllTrim(SL4->L4_FORMA) == "CO"
+				aVlrFormas[08][02] += SL4->L4_VALOR
+			Case AllTrim(SL4->L4_FORMA) == "VA"
+				aVlrFormas[09][02] += SL4->L4_VALOR	
+			Case AllTrim(SL4->L4_FORMA) == "CR"
+				aVlrFormas[10][02] += SL4->L4_VALOR
+			Case AllTrim(SL4->L4_FORMA) == "CA"
+				aVlrFormas[11][02] += SL4->L4_VALOR
+			Case AllTrim(SL4->L4_FORMA) == "DB"
+				aVlrFormas[12][02] += SL4->L4_VALOR
+			Case AllTrim(SL4->L4_FORMA) == "PI"
+				aVlrFormas[13][02] += SL4->L4_VALOR
+			Otherwise
+				aVlrFormas[14][02] += SL4->L4_VALOR	
+		EndCase
 
-	If cTpCli == 'F'
-		cCGCCli := "CPF: " + Alltrim(Transform(cCGCCli, "@R 999.999.999-99"))
-	ElseIF cTpCli == 'J'
-		cCGCCli := "CNPJ: " + Alltrim(Transform(cCGCCli, "@R 99.999.999/9999-99"))
-	EndIF
+		SL4->(dbSkip())
+	EndDo
+EndIf
 
-	If nFinanc > 0
-			
-		cTexto := '<ce>'+ alltrim(cNomCom) +'</ce>'+ Chr(13)+ Chr(10)
-		cTexto += '<ce>'+ alltrim(cEndEnt) + ' - '+ alltrim(cBaiEnt) +'</ce>'+ Chr(13)+ Chr(10)
-		cTexto += '<ce>'+ alltrim(cCidEnt) + ' - '+ alltrim(cEstEnt) + ' CEP:'+ alltrim(cCepEnt) +'</ce>'+ Chr(13)+ Chr(10)
-		cTexto += '<ce> CNPJ: '+ alltrim(cCgcEnt) + ' IE: '+ alltrim(cInsEnt) +'</ce>'+ Chr(13)+ Chr(10)
-
-		cTexto += Replicate("-", nMaxChar)						   + Chr(13)+ Chr(10)
-		cTexto += '<b><ce>COMPROVANTE CARTEIRA</b></ce>'		   + Chr(13)+ Chr(10)
-		cTexto += Replicate("-", nMaxChar)						   + Chr(13)+ Chr(10)
-			 
-		cTexto += Replicate(" ", nMaxChar) + Chr(13)+ Chr(10)	
-		cTexto += "Pagamento Carteira: R$ " +AllTrim(Transform(nFinanc,cPicValor)) + CHR(10)
-		cTexto += Replicate(" ", nMaxChar) + Chr(13)+ Chr(10)
-		cTexto += Replicate("-", nMaxChar)						   + Chr(13)+ Chr(10)
-			
-		cTexto += Replicate(" ", nMaxChar) + Chr(13)+ Chr(10)
-		cTexto += '<ce>' + cMsgCart + '</ce>' + Chr(13) + Chr(10)
-		
-		cTexto += " " + Chr(13)+ Chr(10)
-		cTexto += " " + Chr(13)+ Chr(10)
-		cTexto += " " + Chr(13)+ Chr(10)
-		cTexto += " " + Chr(13)+ Chr(10)
-
-		cTexto += '<ce>'+ Replicate("_", nMaxChar-7) +'</ce> '  + Chr(13) + Chr(10)
-		cTexto += '<b><ce>' + AllTrim(SL1->L1_CLIENTE) + "-" + AllTrim(cNomCli) + '</b></ce>' + Chr(13) + Chr(10)
-		cTexto += '<b><ce>' + cCGCCli + '</b></ce>' + Chr(13) + Chr(10)
-		cTexto += Replicate(" ", nMaxChar) + Chr(13)+ Chr(10)
-			
-		cTexto += Replicate("-", nMaxChar)						     + Chr(13) + Chr(10) 
-		cTexto += '<b>Data:</b> ' + DtoC(dDatabase) + ' <b>Hora: </b>' +Time() + Chr(13) + Chr(10)
-		cTexto += '<b>Vendedor:</b> ' + Alltrim(SL1->L1_VEND)+' - ' +  Alltrim(cNomVen) + Chr(13) + Chr(10)
-		cTexto += '<b>Caixa:</b> ' + Alltrim(SL1->L1_ESTACAO)+'<b> Operador: </b>' + Alltrim(SL1->L1_OPERADO)+' - ' +  Alltrim(cNomOpe) + Chr(13) + Chr(10)
-		cTexto += Replicate("-", nMaxChar)						     + Chr(13) + Chr(10) 
-
-		STWManagReportPrint(cTexto,1) //Envia comando para a Impressora
-
-	EndIf	
-
-	RestArea(aArea)
-
-Return   
+RestArea(aAreaSL4)
+	
+Return aVlrFormas
