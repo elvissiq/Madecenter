@@ -34,7 +34,7 @@ Retorno:
 Nenhum
 --------------------------------------------------------------------------
   @history
-  10/10/2024 - Desenvolvimento da Rotina.
+  14/10/2024 - Desenvolvimento da Rotina.
 /*/
 
 User Function LJ7002()
@@ -101,22 +101,29 @@ User Function LJ7002()
     //================================================================
     // Gera OP para produtos que possuem Estrutura 
     //================================================================
-    dbSelectArea("SL2")
-    dbSetOrder(1)  
-    MsSeek(xFilial("SL2") + SL1->L1_NUM )
+    
+    cQry := " SELECT * FROM " + RetSQLName('SL2') + " "
+    cQry += " WHERE D_E_L_E_T_ <> '*' "
+    cQry += "   AND L2_FILIAL  = '" + SL1->L1_FILIAL + "' "
+    cQry += "   AND L2_NUM     = '" + SL1->L1_NUM  + "' "
+    cQuery := ChangeQuery(cQry)
+    TCQuery cQry ALIAS (_cAlias) NEW
 
-    While !SL2->(Eof()) .AND. SL2->L2_FILIAL + SL2->L2_NUM == xFilial("SL2") +  SL1->L1_NUM   
+    dbSelectArea(_cAlias)
+
+    While (_cAlias)->(!Eof())
       
       dbSelectArea("SG1")
-      dbSetOrder(1)  
-      If SG1->(MsSeek(xFilial("SG1") + SL2->L2_PRODUTO ))
+      dbSetOrder(1)
+      If SG1->(MsSeek(xFilial("SG1") + (_cAlias)->L2_PRODUTO ))
           fnGrvOP()
-        SL2->(DbSkip())
+        (_cAlias)->(DbSkip())
       Else
-        SL2->(DbSkip())
+        (_cAlias)->(DbSkip())
       EndIf
-
     End
+
+    (_cAlias)->(DBCloseArea())
 
   EndIf
   //================================================================
@@ -135,8 +142,6 @@ Return
 @TYPE FUNCTION fnGrvOP - Gera e Baixa a OP conforme informado no item do Pedido de Venda
 @AUTHOR TOTVS Nordeste
 @VERSION PROTHEUS 12
-@Historico
-	07/10/2024 - Desenvolvimento da Rotina (Elvis Siqueira)
 /*/
 Static Function fnGrvOP()
   Local aVetorOP  := {}
@@ -146,17 +151,17 @@ Static Function fnGrvOP()
   
   cNumOP := fGeraNum("C2")
 
-	aAdd(aVetorOP, {'C2_NUM'    , cNumOP                                , Nil} )
-	aAdd(aVetorOP, {'C2_ITEM'   , '01'                       					  , Nil} )
-	aAdd(aVetorOP, {'C2_SEQUEN' , '001'                      					  , Nil} )
-	aAdd(aVetorOP, {'C2_PRODUTO', SL2->L2_PRODUTO         					    , Nil} )
-	aAdd(aVetorOP, {'C2_QUANT'  , SL2->L2_QUANT        					        , Nil} )
-	aAdd(aVetorOP, {'C2_LOCAL'  , SL2->L2_LOCAL        					        , Nil} )
-	aAdd(aVetorOP, {'C2_DATPRI' , SL2->L2_EMISSAO        	   					  , Nil} )
-	aAdd(aVetorOP, {'C2_DATPRF' , SL2->L2_EMISSAO              					, Nil} )
-	aAdd(aVetorOP, {'C2_EMISSAO', SL2->L2_EMISSAO              					, Nil} )
-	aAdd(aVetorOP, {'C2_OBS'    , 'OP Gerada aut. Orc.: '+ SL2->L2_NUM 	, Nil} )
-	aAdd(aVetorOP, {'AUTEXPLODE', 'S'                        					  , Nil} )
+	aAdd(aVetorOP, {'C2_NUM'    , cNumOP                                      , Nil} )
+	aAdd(aVetorOP, {'C2_ITEM'   , '01'                       					        , Nil} )
+	aAdd(aVetorOP, {'C2_SEQUEN' , '001'                      					        , Nil} )
+	aAdd(aVetorOP, {'C2_PRODUTO', (_cAlias)->L2_PRODUTO         					    , Nil} )
+	aAdd(aVetorOP, {'C2_QUANT'  , (_cAlias)->L2_QUANT        					        , Nil} )
+	aAdd(aVetorOP, {'C2_LOCAL'  , (_cAlias)->L2_LOCAL        					        , Nil} )
+	aAdd(aVetorOP, {'C2_DATPRI' , SToD((_cAlias)->L2_EMISSAO)        	   			, Nil} )
+	aAdd(aVetorOP, {'C2_DATPRF' , SToD((_cAlias)->L2_EMISSAO)              		, Nil} )
+	aAdd(aVetorOP, {'C2_EMISSAO', SToD((_cAlias)->L2_EMISSAO)              		, Nil} )
+	aAdd(aVetorOP, {'C2_OBS'    , 'OP Gerada aut. Orc.: '+ (_cAlias)->L2_NUM 	, Nil} )
+	aAdd(aVetorOP, {'AUTEXPLODE', 'S'                        					        , Nil} )
 
   lMsErroAuto:= .F. 
   MSExecAuto({|x, y| MATA650(x, y)}, aVetorOP, 3)
@@ -178,7 +183,6 @@ Return
 	Gera o proximo numero do documento
 	@type  Static Function
 	@author Elvis Siqueira (TOTVS Recife)
-	@since 07/10/2024
 /*/
 Static Function fGeraNum(pTab)
 	Local cNum  := ""

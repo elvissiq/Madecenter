@@ -34,7 +34,7 @@ User Function LJRESERV()
 		fSelectLj()
 		
 		//Operacao 2: Selecao do "ARMAZEM" (Local de Estoque) relacionado a loja onde serao reservados os produtos
-		Case cOper == "2" .And. !Empty(aLojas)
+		Case cOper == "2" .And. !Empty(aLojas) .And. !Empty(aProdutos)
 		fReserv()
 		
 	End Case 
