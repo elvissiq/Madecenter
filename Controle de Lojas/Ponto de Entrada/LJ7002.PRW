@@ -34,7 +34,7 @@ Retorno:
 Nenhum
 --------------------------------------------------------------------------
   @history
-  14/10/2024 - Desenvolvimento da Rotina.
+  17/10/2024 - Desenvolvimento da Rotina.
 /*/
 
 User Function LJ7002()
