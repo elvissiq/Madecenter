@@ -87,7 +87,8 @@ User Function SCRPED()
 			cSerPed := PARAMIXB[4,1,1]
 			cDocPed := PARAMIXB[4,1,2]
 		ElseIF !(IsInCallStack("STIPOSMAIN"))
-			Return sTexto 
+			sTexto := "."
+			Return sTexto
 		EndIf
 	EndIf
 
@@ -330,13 +331,13 @@ Static Function fCompPag()
 	STWManagReportPrint(cTxImp,1) //Envia comando para a Impressora
 	STWManagReportPrint(cTxImp,1) //Envia comando para a Impressora
 
-	sTexto := ''
+	sTexto := '.'
 
 Return
 
 //-------------------------------------------------------------------
-/*/{Protheus.doc} fCompPag
-Funcao para impressao do comprovante de pagamento
+/*/{Protheus.doc} fPrdMadFerr
+Funcao para alimentar o array com os produtos do tipo Retira
 @type function
 @param 
 
@@ -593,7 +594,7 @@ Static Function fCompRet(pPos)
 	cTxImp := StrTran( sTexto, ',', '.' )
 	STWManagReportPrint(cTxImp,1) //Envia comando para a Impressora
 
-	sTexto := ''
+	sTexto := '.'
 
 Return
 
