@@ -15,7 +15,7 @@ User Function LJ7023()
         
         IF LjProfile(3)
                 lRet := .T.
-        ElseIF cFormaPg $("BOLETO BANCARIO/CARTEIRA")
+        ElseIF cFormaPg $("BOLETO BANCARIO")
                 lRet := .T.  
         EndIF 
 
