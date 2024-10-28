@@ -60,43 +60,6 @@ User Function LJ7002()
     EndIF
   
   ElseIF cOpcao == '2' .AND. lGrvBatch
-    
-    //================================================================
-    // Baixa do título do tipo CH 
-    //================================================================
-    cQry := " SELECT * FROM " + RetSQLName('SE1') + " "
-    cQry += " WHERE D_E_L_E_T_ <> '*' "
-    cQry += "   AND E1_FILIAL  = '" + xFilial("SE1") + "' "
-    cQry += "   AND E1_PREFIXO = '" + SL1->L1_SERIE + "' "
-    cQry += "   AND E1_NUM     = '" + SL1->L1_DOC + "' "
-    cQry += "   AND E1_TIPO    = 'CH' "
-    cQuery := ChangeQuery(cQry)
-    TCQuery cQry ALIAS (_cAlias) NEW
-    
-    While (_cAlias)->(!Eof()) .AND. !Empty(aBankBXCH)
-      
-      aAdd(aBXTitCH,{"E1_PREFIXO"  , (_cAlias)->E1_PREFIXO       ,Nil    })
-      aAdd(aBXTitCH,{"E1_NUM"      , (_cAlias)->E1_NUM           ,Nil    })
-      aAdd(aBXTitCH,{"E1_PARCELA"  , (_cAlias)->E1_PARCELA       ,Nil    })
-      aAdd(aBXTitCH,{"E1_TIPO"     , (_cAlias)->E1_TIPO          ,Nil    })
-      aAdd(aBXTitCH,{"AUTMOTBX"    , "NOR"                       ,Nil    })
-      aAdd(aBXTitCH,{"AUTBANCO"    , aBankBXCH[1]                ,Nil    })
-      aAdd(aBXTitCH,{"AUTAGENCIA"  , aBankBXCH[2]                ,Nil    })
-      aAdd(aBXTitCH,{"AUTCONTA"    , aBankBXCH[3]                ,Nil    })
-      aAdd(aBXTitCH,{"AUTDTBAIXA"  , SToD((_cAlias)->E1_EMISSAO) ,Nil    })
-      aAdd(aBXTitCH,{"AUTDTCREDITO", SToD((_cAlias)->E1_EMISSAO) ,Nil    })
-      aAdd(aBXTitCH,{"AUTHIST"     , "Baixa automatica CH"       ,Nil    })
-      aAdd(aBXTitCH,{"AUTJUROS"    , 0                           ,Nil,.T.})
-      aAdd(aBXTitCH,{"AUTVALREC"   , (_cAlias)->E1_SALDO         ,Nil    })    
-
-      lMsErroAuto:= .F. 
-      MSExecAuto({|x,y| FINA070(x,y)},aBXTitCH,3)
-    
-    (_cAlias)->(DBSkip())
-    End
-
-    (_cAlias)->(DBCloseArea())
-    //================================================================
 
     //================================================================
     // Gera OP para produtos que possuem Estrutura 
@@ -125,7 +88,44 @@ User Function LJ7002()
 
     (_cAlias)->(DBCloseArea())
 
+    //================================================================
   EndIf
+
+  //================================================================
+  // Baixa do título do tipo CH 
+  //================================================================
+  cQry := " SELECT * FROM " + RetSQLName('SE1') + " "
+  cQry += " WHERE D_E_L_E_T_ <> '*' "
+  cQry += "   AND E1_FILIAL  = '" + xFilial("SE1") + "' "
+  cQry += "   AND E1_PREFIXO = '" + SL1->L1_SERIE + "' "
+  cQry += "   AND E1_NUM     = '" + SL1->L1_DOC + "' "
+  cQry += "   AND E1_TIPO    = 'CH' "
+  cQuery := ChangeQuery(cQry)
+  TCQuery cQry ALIAS (_cAlias) NEW
+  
+  While (_cAlias)->(!Eof()) .AND. !Empty(aBankBXCH)
+    
+    aAdd(aBXTitCH,{"E1_PREFIXO"  , (_cAlias)->E1_PREFIXO       ,Nil    })
+    aAdd(aBXTitCH,{"E1_NUM"      , (_cAlias)->E1_NUM           ,Nil    })
+    aAdd(aBXTitCH,{"E1_PARCELA"  , (_cAlias)->E1_PARCELA       ,Nil    })
+    aAdd(aBXTitCH,{"E1_TIPO"     , (_cAlias)->E1_TIPO          ,Nil    })
+    aAdd(aBXTitCH,{"AUTMOTBX"    , "NOR"                       ,Nil    })
+    aAdd(aBXTitCH,{"AUTBANCO"    , aBankBXCH[1]                ,Nil    })
+    aAdd(aBXTitCH,{"AUTAGENCIA"  , aBankBXCH[2]                ,Nil    })
+    aAdd(aBXTitCH,{"AUTCONTA"    , aBankBXCH[3]                ,Nil    })
+    aAdd(aBXTitCH,{"AUTDTBAIXA"  , SToD((_cAlias)->E1_EMISSAO) ,Nil    })
+    aAdd(aBXTitCH,{"AUTDTCREDITO", SToD((_cAlias)->E1_EMISSAO) ,Nil    })
+    aAdd(aBXTitCH,{"AUTHIST"     , "Baixa automatica CH"       ,Nil    })
+    aAdd(aBXTitCH,{"AUTJUROS"    , 0                           ,Nil,.T.})
+    aAdd(aBXTitCH,{"AUTVALREC"   , (_cAlias)->E1_SALDO         ,Nil    })    
+    
+    lMsErroAuto:= .F. 
+    MSExecAuto({|x,y| FINA070(x,y)},aBXTitCH,3)
+  
+    (_cAlias)->(DBSkip())
+  End
+
+  (_cAlias)->(DBCloseArea())
   //================================================================
 
   RecLock("SL1",.F.)
