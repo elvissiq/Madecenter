@@ -17,6 +17,9 @@ User Function SCRPED()
 	Private nFinanc			:= 0
 	Private nCredito		:= 0
 	Private nOutros			:= 0
+	Private nCarteir	    := 0
+	Private nDeposit	    := 0
+	Private nPIXManu	    := 0
 	Private cQuant 			:= ""	
 	Private cVrUnit			:= "" 								// Valor unitário
 	Private cDesconto		:= ""
@@ -75,7 +78,7 @@ User Function SCRPED()
 
 	If ValType(PARAMIXB) == "A" .AND. Len(PARAMIXB) > 0  
 		If ValType(PARAMIXB[1]) == "A" .AND. Len(PARAMIXB[1]) > 0
-			ProdGarantia := PARAMIXB[1]
+			aProdGarantia := PARAMIXB[1]
 		EndIf
 		If (Len(PARAMIXB) > 1) .And. ValType(PARAMIXB[2]) == "N" .AND. (PARAMIXB[2] > 0)
 			nFatorRes	:=	PARAMIXB[2]
@@ -156,7 +159,7 @@ Static Function fCompPag()
 	Necessariio dar um round em cada forma para verificar se ha diferença de arredondamento no somatorio dos pagamentos*/
 	nValPag :=	Round(nDinheir,2)	+	Round(nCheques,2)	+	Round(nCartaoC,2)	+	Round(nCartaoD,2)	+;
 				Round(nConveni,2)	+	Round(nVales,2)	+	Round(nCredito,2)	+	Round(nFinanc,2)	+;
-				Round(nOutros,2)
+				Round(nOutros,2) + Round(nPIX,2) + Round(nCartDig,2) + Round(nCarteir,2) + Round(nDeposit,2) + Round(nPIXManu,2)
 
 	dbSelectArea("SL2")
 	dbSetOrder(1)  
@@ -422,16 +425,16 @@ Static Function fCompRet(pPos)
 	dbSetOrder(1)  
 	dbSeek(xFilial("SL1") + nOrcam)
 
-	nTroco		:= Iif(SL1->(FieldPos("L1_TROCO1")) > 0,(nFatorRes * SL1->L1_TROCO1), 0)
-	nDinheir	:= (nFatorRes * SL1->L1_DINHEIR)
-	nCheques	:= (nFatorRes * SL1->L1_CHEQUES)
-	nCartaoC 	:= (nFatorRes * SL1->L1_CARTAO)
-	nCartaoD 	:= (nFatorRes * SL1->L1_VLRDEBI)
-	nConveni	:= (nFatorRes * SL1->L1_CONVENI)
-	nVales  	:= (nFatorRes * SL1->L1_VALES)  	
-	nCredito	:= (nFatorRes * SL1->L1_CREDITO)  	
-	nFinanc		:= (nFatorRes * SL1->L1_FINANC)
-	nOutros		:= (nFatorRes * SL1->L1_OUTROS)
+	//nTroco		:= Iif(SL1->(FieldPos("L1_TROCO1")) > 0,(nFatorRes * SL1->L1_TROCO1), 0)
+	//nDinheir	:= (nFatorRes * SL1->L1_DINHEIR)
+	//nCheques	:= (nFatorRes * SL1->L1_CHEQUES)
+	//nCartaoC 	:= (nFatorRes * SL1->L1_CARTAO)
+	//nCartaoD 	:= (nFatorRes * SL1->L1_VLRDEBI)
+	//nConveni	:= (nFatorRes * SL1->L1_CONVENI)
+	//nVales  	:= (nFatorRes * SL1->L1_VALES)  	
+	//nCredito	:= (nFatorRes * SL1->L1_CREDITO)  	
+	//nFinanc		:= (nFatorRes * SL1->L1_FINANC)
+	//nOutros		:= (nFatorRes * SL1->L1_OUTROS)
 	nValTot		:= 0
 	nDescTot	:= 0
 
@@ -439,7 +442,7 @@ Static Function fCompRet(pPos)
 	Necessariio dar um round em cada forma para verificar se ha diferença de arredondamento no somatorio dos pagamentos*/
 	nValPag :=	Round(nDinheir,2)	+	Round(nCheques,2)	+	Round(nCartaoC,2)	+	Round(nCartaoD,2)	+;
 				Round(nConveni,2)	+	Round(nVales,2)	+	Round(nCredito,2)	+	Round(nFinanc,2)	+;
-				Round(nOutros,2)
+				Round(nOutros,2) + Round(nPIX,2) + Round(nCartDig,2) + Round(nCarteir,2) + Round(nDeposit,2) + Round(nPIXManu,2)
 
 	dbSelectArea("SL2")
 	dbSetOrder(1)  
@@ -769,60 +772,62 @@ Retorna os valores de cada Forma de Pagamento da venda conforma os valores grava
 @return aVlrFormas, arrray, array com os valores de cada Forma de Pagamento
 /*/
 Static Function SCRPRetPgt()
-Local aAreaSL4		:= SL4->(GetArea())
-Local aVlrFormas	:= {{"R$",0},;	// 01
-						{"CH",0},;	// 02
-						{"CC",0},;	// 03
-						{"CD",0},;	// 04
-						{"PX",0},;	// 05
-						{"PD",0},;	// 06
-						{"FI",0},;	// 07
-						{"CO",0},;	// 08
-						{"VA",0},;	// 09
-						{"CR",0},;	// 10
-						{"CA",0},;	// 11
-						{"DB",0},;	// 12
-						{"PI",0},;	// 13
-						{"OUTRO",0}} // 14
+	Local aAreaSL4		:= SL4->(GetArea())
+	Local aVlrFormas	:= {{"R$",0},;	// 01
+							{"CH",0},;	// 02
+							{"CC",0},;	// 03
+							{"CD",0},;	// 04
+							{"PX",0},;	// 05
+							{"PD",0},;	// 06
+							{"FI",0},;	// 07
+							{"CO",0},;	// 08
+							{"VA",0},;	// 09
+							{"CR",0},;	// 10
+							{"CA",0},;	// 11
+							{"DB",0},;	// 12
+							{"PI",0},;	// 13
+							{"OUTRO",0}} // 14
+	
+	IF !Empty(SL1->L1_CREDITO)
+		aVlrFormas[10][02] += SL1->L1_CREDITO
+	EndIF
 
-SL4->(dbSetOrder(1))
-If SL4->(dbSeek(SL1->L1_FILIAL + SL1->L1_NUM))
-	While SL4->(!EOF()) .AND. SL4->L4_FILIAL == SL1->L1_FILIAL .AND. SL4->L4_NUM == SL1->L1_NUM
-		Do Case
-			Case AllTrim(SL4->L4_FORMA) == "R$"
-				aVlrFormas[01][02] += SL4->L4_VALOR
-			Case AllTrim(SL4->L4_FORMA) == "CH"
-				aVlrFormas[02][02] += SL4->L4_VALOR
-			Case AllTrim(SL4->L4_FORMA) == "CC"
-				aVlrFormas[03][02] += SL4->L4_VALOR
-			Case AllTrim(SL4->L4_FORMA) == "CD"
-				aVlrFormas[04][02] += SL4->L4_VALOR
-			Case AllTrim(SL4->L4_FORMA) == "PX"
-				aVlrFormas[05][02] += SL4->L4_VALOR
-			Case AllTrim(SL4->L4_FORMA) == "PD"
-				aVlrFormas[06][02] += SL4->L4_VALOR
-			Case AllTrim(SL4->L4_FORMA) == "FI"
-				aVlrFormas[07][02] += SL4->L4_VALOR
-			Case AllTrim(SL4->L4_FORMA) == "CO"
-				aVlrFormas[08][02] += SL4->L4_VALOR
-			Case AllTrim(SL4->L4_FORMA) == "VA"
-				aVlrFormas[09][02] += SL4->L4_VALOR	
-			Case AllTrim(SL4->L4_FORMA) == "CR"
-				aVlrFormas[10][02] += SL4->L4_VALOR
-			Case AllTrim(SL4->L4_FORMA) == "CA"
-				aVlrFormas[11][02] += SL4->L4_VALOR
-			Case AllTrim(SL4->L4_FORMA) == "DB"
-				aVlrFormas[12][02] += SL4->L4_VALOR
-			Case AllTrim(SL4->L4_FORMA) == "PI"
-				aVlrFormas[13][02] += SL4->L4_VALOR
-			Otherwise
-				aVlrFormas[14][02] += SL4->L4_VALOR	
-		EndCase
+	SL4->(dbSetOrder(1))
+	If SL4->(dbSeek(SL1->L1_FILIAL + SL1->L1_NUM))
+		While SL4->(!EOF()) .AND. SL4->L4_FILIAL == SL1->L1_FILIAL .AND. SL4->L4_NUM == SL1->L1_NUM
+			Do Case
+				Case AllTrim(SL4->L4_FORMA) == "R$"
+					aVlrFormas[01][02] += SL4->L4_VALOR
+				Case AllTrim(SL4->L4_FORMA) == "CH"
+					aVlrFormas[02][02] += SL4->L4_VALOR
+				Case AllTrim(SL4->L4_FORMA) == "CC"
+					aVlrFormas[03][02] += SL4->L4_VALOR
+				Case AllTrim(SL4->L4_FORMA) == "CD"
+					aVlrFormas[04][02] += SL4->L4_VALOR
+				Case AllTrim(SL4->L4_FORMA) == "PX"
+					aVlrFormas[05][02] += SL4->L4_VALOR
+				Case AllTrim(SL4->L4_FORMA) == "PD"
+					aVlrFormas[06][02] += SL4->L4_VALOR
+				Case AllTrim(SL4->L4_FORMA) == "FI"
+					aVlrFormas[07][02] += SL4->L4_VALOR
+				Case AllTrim(SL4->L4_FORMA) == "CO"
+					aVlrFormas[08][02] += SL4->L4_VALOR
+				Case AllTrim(SL4->L4_FORMA) == "VA"
+					aVlrFormas[09][02] += SL4->L4_VALOR	
+				Case AllTrim(SL4->L4_FORMA) == "CA"
+					aVlrFormas[11][02] += SL4->L4_VALOR
+				Case AllTrim(SL4->L4_FORMA) == "DB"
+					aVlrFormas[12][02] += SL4->L4_VALOR
+				Case AllTrim(SL4->L4_FORMA) == "PI"
+					aVlrFormas[13][02] += SL4->L4_VALOR
+				Otherwise
+					aVlrFormas[14][02] += SL4->L4_VALOR	
+			EndCase
 
-		SL4->(dbSkip())
-	EndDo
-EndIf
+			SL4->(dbSkip())
+		EndDo
+	EndIf
 
-RestArea(aAreaSL4)
+	RestArea(aAreaSL4)
 	
 Return aVlrFormas

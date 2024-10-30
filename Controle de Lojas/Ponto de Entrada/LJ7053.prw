@@ -30,5 +30,6 @@ User Function LJ7053()
         AAdd(aDados, { "Crédito Correntista","U_MLJF06", 0, 1, NIL, .F.})
         AAdd(aDados, { "Imp. Orc. Completo","U_zROrcComp", 0, 1, NIL, .F.})
         AAdd(aDados, { "Imp. Orc. Simples" ,"U_zROrcSimp", 0, 1, NIL, .F.})
+        AAdd(aDados, { "Comprovante Retira" ,"U_MLJF07", 0, 2, NIL, .F.})
 
 Return aDados
