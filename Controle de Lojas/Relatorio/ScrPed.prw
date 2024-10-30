@@ -10,10 +10,13 @@ User Function SCRPED()
 	Private nOrcam			:= 0
 	Private sTexto      	:= ""              
 	Private nCheques		:= 0
+	Private nDinheir        := 0
 	Private nCartaoC		:= 0
 	Private nCartaoD		:= 0
 	Private nConveni		:= 0
 	Private nVales			:= 0
+	Private nPIX	 	    := 0
+	Private nCartDig 	    := 0
 	Private nFinanc			:= 0
 	Private nCredito		:= 0
 	Private nOutros			:= 0
@@ -202,12 +205,15 @@ Static Function fCompPag()
 			If (!lMvGarFP .AND. !lLibQtdGE ) .AND. (cGarantia == "*" .OR. (Posicione("SB1",1,xFilial("SB1")+SL2->L2_PRODUTO, "B1_TIPO") == SuperGetMV("MV_LJTPGAR",,"GE")))
 				cVrUnit	:= Str(((SL2->L2_QUANT * SL2->L2_VLRITEM) + SL2->L2_VALIPI + nVlrIcmsRet) / SL2->L2_QUANT, 15, 2)
 			Else
-				cVrUnit	:= Str(((SL2->L2_QUANT * SL2->L2_PRCTAB) + SL2->L2_VALIPI + nVlrIcmsRet) / SL2->L2_QUANT, 15, 2)
+				//cVrUnit	:= Str(((SL2->L2_QUANT * SL2->L2_PRCTAB) + SL2->L2_VALIPI + nVlrIcmsRet) / SL2->L2_QUANT, 15, 2)
+				cVrUnit	:= AllToChar(((SL2->L2_VLRITEM + SL2->L2_VALIPI + nVlrIcmsRet) / SL2->L2_QUANT),PesqPict("SL2","L2_VLRITEM"))
 			EndIf
 
 			//Valor de desconto no item
 			nVlrDescIt += SL2->L2_VALDESC
 			nTotDesc   += SL2->L2_DESCPRO
+			cVrUnit    := StrTran(cVrUnit,".","")
+			cVrUnit    := StrTran(cVrUnit,",",".")
 			cVlrItem   := Str(Val(cVrUnit) * SL2->L2_QUANT, 15, 2)
 			
 			nValTot  += Val(cVlrItem)
@@ -235,9 +241,11 @@ Static Function fCompPag()
 
 	//Armazena Valor Total
 	If lMvArrefat
-		nVlrTot := Round((nValTot - nDescTot - nVlrDescIt + nTroco), TamSX3("D2_TOTAL")[2])
+		//nVlrTot := Round((nValTot - nDescTot - nVlrDescIt + nTroco), TamSX3("D2_TOTAL")[2])
+		nVlrTot := Round((nValTot + nTroco), TamSX3("D2_TOTAL")[2])
 	Else
-		nVlrTot := NoRound((nValTot - nDescTot - nVlrDescIt + nTroco), TamSX3("D2_TOTAL")[2])
+		//nVlrTot := NoRound((nValTot - nDescTot - nVlrDescIt + nTroco), TamSX3("D2_TOTAL")[2])
+		nVlrTot := NoRound((nValTot + nTroco), TamSX3("D2_TOTAL")[2])
 	EndIf
 
 	//Calcula juros
@@ -437,6 +445,8 @@ Static Function fCompRet(pPos)
 	//nOutros		:= (nFatorRes * SL1->L1_OUTROS)
 	nValTot		:= 0
 	nDescTot	:= 0
+	nVlrDescIt  := 0
+	nTotDesc    := 0
 
 	/* Soma o valor de todas as formas de pagamento
 	Necessariio dar um round em cada forma para verificar se ha diferença de arredondamento no somatorio dos pagamentos*/
@@ -480,15 +490,19 @@ Static Function fCompRet(pPos)
 		Endif
 		
 		cQuant 	:= Alltrim(Transform(SL2->L2_QUANT, "@E 999,999,999.99"))
+	
 		If (!lMvGarFP .AND. !lLibQtdGE ) .AND. (cGarantia == "*" .OR. (Posicione("SB1",1,xFilial("SB1")+SL2->L2_PRODUTO, "B1_TIPO") == SuperGetMV("MV_LJTPGAR",,"GE")))
 			cVrUnit	:= Str(((SL2->L2_QUANT * SL2->L2_VLRITEM) + SL2->L2_VALIPI + nVlrIcmsRet) / SL2->L2_QUANT, 15, 2)
 		Else
-			cVrUnit	:= Str(((SL2->L2_QUANT * SL2->L2_PRCTAB) + SL2->L2_VALIPI + nVlrIcmsRet) / SL2->L2_QUANT, 15, 2)
+			//cVrUnit	:= Str(((SL2->L2_QUANT * SL2->L2_PRCTAB) + SL2->L2_VALIPI + nVlrIcmsRet) / SL2->L2_QUANT, 15, 2)
+			cVrUnit	:= AllToChar(((SL2->L2_VLRITEM + SL2->L2_VALIPI + nVlrIcmsRet) / SL2->L2_QUANT),PesqPict("SL2","L2_VLRITEM"))
 		EndIf
 		
 		//Valor de desconto no item
 		nVlrDescIt += SL2->L2_VALDESC
 		nTotDesc   += SL2->L2_DESCPRO
+		cVrUnit    := StrTran(cVrUnit,".","")
+		cVrUnit    := StrTran(cVrUnit,",",".")
 		cVlrItem   := Str(Val(cVrUnit) * SL2->L2_QUANT, 15, 2)
 		sTexto	   := sTexto + PadR( Alltrim(SL2->L2_PRODUTO) + ' - ' + Alltrim(SL2->L2_DESCRI) ,nMaxChar) + Chr(13) + Chr(10)
 		sTexto	   := sTexto + '<b>'+cQuant + '  ' + cVrUnit + '      ' + cVlrItem +'</b>'+ Chr(13) + Chr(10)
@@ -520,9 +534,11 @@ Static Function fCompRet(pPos)
 
 	//Armazena Valor Total
 	If lMvArrefat
-		nVlrTot := Round((nValTot - nDescTot - nVlrDescIt + nTroco), TamSX3("D2_TOTAL")[2])
+		//nVlrTot := Round((nValTot - nDescTot - nVlrDescIt + nTroco), TamSX3("D2_TOTAL")[2])
+		nVlrTot := Round((nValTot + nTroco), TamSX3("D2_TOTAL")[2])
 	Else
-		nVlrTot := NoRound((nValTot - nDescTot - nVlrDescIt + nTroco), TamSX3("D2_TOTAL")[2])
+		//nVlrTot := NoRound((nValTot - nDescTot - nVlrDescIt + nTroco), TamSX3("D2_TOTAL")[2])
+		nVlrTot := NoRound((nValTot + nTroco), TamSX3("D2_TOTAL")[2])
 	EndIf
 
 	//Calcula juros

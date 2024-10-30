@@ -12,12 +12,61 @@ FUNÇÃO MLJF07 - Reimpressão de comprovante retira
 //----------------------------------------------------------------------
 
 User Function MLJF07()
+  Local aArea     := FWGetArea()
   Local aPARAMIXB := {}
-  
-  IF LjProfile(8)
-    If ExistBlock("SCRPED")
-      ExecBlock("SCRPED" ,.F.,.F., aPARAMIXB )
-    EndIF
+  Local oPanel    := Nil
+  Local oFont     := TFont():New('Arial Black',,-23,.T.)
+  Local lContinua := .T.
+  Local nTamOrc   := 6 //Space(FWTamSX3("L1_NUM")[1])
+	Local cNumOrc   := Space(nTamOrc)
+
+  Private oDialog := Nil
+  Private lBtOK   := .F.
+
+  If IsInCallStack("STIPOSMAIN")
+
+    oDialog := FWDialogModal():New()
+		oDialog:SetBackground( .T. ) 
+		oDialog:SetTitle( 'Numero do Orcamento' )
+		oDialog:SetSize( 080, 190 )
+		oDialog:EnableFormBar( .T. )
+		oDialog:SetCloseButton( .T. )
+		oDialog:SetEscClose( .T. )
+		oDialog:CreateDialog()
+		oDialog:CreateFormBar()
+		oDialog:addCloseButton(Nil, "Fechar")
+    oDialog:addOkButton({|| fButtomOk() },'Confirmar')
+		oPanel := oDialog:GetPanelMain()
+		oTSay  := TSay():New(10,5,{|| "Nº Orcamento:"},oPanel,,oFont,,,,.T.,,,110,100,,,,,,.T.)
+              @ 008,115 MSGET cNumOrc SIZE 050,020 FONT oFont OF oPanel PIXEL
+		oDialog:Activate()
+
+    If lBtOK .And. !Empty(cNumOrc)
+      DBSelectArea("SL1")
+      IF !SL1->(MSSeek(xFilial("SL1") + AllTrim(StrZero(Val(cNumOrc),nTamOrc)) ))
+        FWAlertWarning("Nenhum orçamento encontrado com o número: " + cNumOrc,"Reimpressao de comprovantes!")
+        lContinua := .F.
+      EndIF 
+    EndIF 
+
   EndIF
 
+  IF lContinua
+    IF LjProfile(8)
+      If ExistBlock("SCRPED")
+        ExecBlock("SCRPED" ,.F.,.F., aPARAMIXB )
+      EndIF
+    EndIF
+  EndIF 
+
+  FWRestArea(aArea)
+
 Return
+
+/*/{Protheus.doc} fButtomOk
+    Botão OK 
+/*/
+Static Function fButtomOk()
+    lBtOK := .T.
+    oDialog:DeActivate()
+Return 
