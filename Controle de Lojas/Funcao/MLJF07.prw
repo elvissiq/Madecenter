@@ -1,5 +1,6 @@
 //Bibliotecas
 #Include 'Protheus.ch'
+#Include 'TOTVS.ch'
 #Include "TOPCONN.ch"
 #Include 'FWMVCDef.ch'
 
@@ -43,6 +44,7 @@ User Function MLJF07()
 
     If lBtOK .And. !Empty(cNumOrc)
       DBSelectArea("SL1")
+      SL1->(dbSetOrder(1))
       IF !SL1->(MSSeek(xFilial("SL1") + AllTrim(StrZero(Val(cNumOrc),nTamOrc)) ))
         FWAlertWarning("Nenhum orçamento encontrado com o número: " + AllTrim(StrZero(Val(cNumOrc),nTamOrc)),"Reimpressao de comprovantes!")
         lContinua := .F.
@@ -52,7 +54,7 @@ User Function MLJF07()
   EndIF
 
   IF lContinua
-    IF LjProfile(8)
+    IF FWAuthSuper()
       If ExistBlock("SCRPED")
         ExecBlock("SCRPED" ,.F.,.F., aPARAMIXB )
       EndIF
