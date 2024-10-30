@@ -17,7 +17,7 @@ User Function MLJF07()
   Local oPanel    := Nil
   Local oFont     := TFont():New('Arial Black',,-23,.T.)
   Local lContinua := .T.
-  Local nTamOrc   := 6 //Space(FWTamSX3("L1_NUM")[1])
+  Local nTamOrc   := FWTamSX3("L1_NUM")[1]
 	Local cNumOrc   := Space(nTamOrc)
 
   Private oDialog := Nil
@@ -44,7 +44,7 @@ User Function MLJF07()
     If lBtOK .And. !Empty(cNumOrc)
       DBSelectArea("SL1")
       IF !SL1->(MSSeek(xFilial("SL1") + AllTrim(StrZero(Val(cNumOrc),nTamOrc)) ))
-        FWAlertWarning("Nenhum orçamento encontrado com o número: " + cNumOrc,"Reimpressao de comprovantes!")
+        FWAlertWarning("Nenhum orçamento encontrado com o número: " + AllTrim(StrZero(Val(cNumOrc),nTamOrc)),"Reimpressao de comprovantes!")
         lContinua := .F.
       EndIF 
     EndIF 

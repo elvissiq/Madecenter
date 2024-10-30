@@ -16,6 +16,6 @@ o array referente ao menu padrão do TOTVS PDV e retorna os itens de menu específ
 User Function STMenu()
 	Local aRetor 	:= {}
 	
-	aAdd(aRetor,{"Reimpressao de Comprovantes","U_MLJF07"})
+	aAdd(aRetor,{"Reimpressao de Comprovantes","U_MLJF07()"})
 
 Return(aRetor)
