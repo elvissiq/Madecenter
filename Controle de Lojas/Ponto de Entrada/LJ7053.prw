@@ -18,8 +18,7 @@ User Function LJ7053()
         aSubI2 := {{ "Liberar Quantidade", "MATA455"	,0,3},; 
         	   { "Gerar Nota Fiscal", "MATA460A"	,0,3},; 
             	   { "NF-e Sefaz", "SPEDNFE"	        ,0,3},; 
-               	   { "Nota Fiscal Servico", "FISA022"	,0,3},;
-                   { "Excluir NF", "MATA521A"	        ,0,3} }	
+               	   { "Nota Fiscal Servico", "FISA022"	,0,3}}	
         
         
         aItem := {{ "Cupom Fiscal", aSubI1 ,0,3},; 
