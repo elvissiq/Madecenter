@@ -97,8 +97,10 @@ User Function LJ7002()
   cQry := " SELECT * FROM " + RetSQLName('SE1') + " "
   cQry += " WHERE D_E_L_E_T_ <> '*' "
   cQry += "   AND E1_FILIAL  = '" + xFilial("SE1") + "' "
-  cQry += "   AND E1_PREFIXO = '" + SL1->L1_SERIE + "' "
-  cQry += "   AND E1_NUM     = '" + SL1->L1_DOC + "' "
+  cQry += "   AND E1_PREFIXO = '" + SL1->L1_SERPED + "' "
+  cQry += "   AND E1_NUM     = '" + SL1->L1_DOCPED + "' "
+  cQry += "   AND E1_CLIENTE = '" + SL1->L1_CLIENTE + "' "
+  cQry += "   AND E1_LOJA    = '" + SL1->L1_LOJA + "' "
   cQry += "   AND E1_TIPO    = 'CH' "
   cQuery := ChangeQuery(cQry)
   TCQuery cQry ALIAS (_cAlias) NEW
