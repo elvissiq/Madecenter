@@ -329,11 +329,11 @@ Static Function fOrcamento()
   Local cChave := ""
 
   IF oModelTMP1:GetValue("T1_TIPO") == "C" 
-    cChave := T2->T2_PREFIXO + T2->T2_NUM
+    cChave := FWFldGet("T2_PREFIXO") + FWFldGet("T2_NUM")
   Else
     DBSelectArea("SD1")
     SD1->(DBSetOrder(1))
-    IF SD1->(MSSeek(xFilial("SD1") + T2->T2_NUM + T2->T2_PREFIXO ))
+    IF SD1->(MSSeek(xFilial("SD1") + FWFldGet("T2_NUM") + FWFldGet("T2_PREFIXO") ))
       cChave := SD1->D1_SERIORI + SD1->D1_NFORI
     EndIF 
   EndIF 
