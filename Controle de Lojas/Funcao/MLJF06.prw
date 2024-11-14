@@ -162,8 +162,8 @@ Local oStrCalc := FWCalcStruct(oModel:GetModel('CALCTMP2'))
   oView:AddGrid('VIEW_TMP2',oStrTMP2,'T2DETAIL')
   oView:AddField('VIEW_CALC',oStrCalc,'CALCTMP2')
     
-  oView:CreateHorizontalBox('CABEC',010)
-  oView:CreateHorizontalBox('GRID',080)
+  oView:CreateHorizontalBox('CABEC',020)
+  oView:CreateHorizontalBox('GRID',070)
   oView:CreateHorizontalBox('CALC',010)
     
   oView:SetOwnerView('VIEW_TMP','CABEC')
@@ -340,9 +340,16 @@ Static Function fOrcamento()
 
   If !Empty(cChave)
     DBSelectArea("SL1")
-    SL1->(DBSetOrder(2))
+    SL1->(DBSetOrder(2))   
     IF SL1->(MSSeek(xFilial("SL1") + cChave ))
       Lj7Venda("SL1", Recno(), 2)
+    Else
+      SL1->(DBSetOrder(11))
+      IF SL1->(MSSeek(xFilial("SL1") + cChave ))
+        Lj7Venda("SL1", Recno(), 2)
+      Else
+        FWAlertInfo("Nenhum orçamento encontrado para esse crédito.","Consulta Orçamento")
+      EndIF
     EndIF
   Else
     FWAlertInfo("Nenhum orçamento encontrado para esse crédito.","Consulta Orçamento")

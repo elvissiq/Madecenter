@@ -15,11 +15,10 @@ User Function LJ7053()
         aSubI1 := {{ "Confirmar Entrega" , "U_MLJF03"	,0,1}} 
         
 
-        aSubI2 := {{ "Liberar Quantidade", "MATA455"	,0,3},; 
-        	   { "Gerar Nota Fiscal", "MATA460A"	,0,3},; 
+        aSubI2 := {{ "Liberar Quantidade", "U_MLJF08"	,0,3},;
+        	   { "Gerar Nota Fiscal", "U_MLJF08"	,0,3},; 
             	   { "NF-e Sefaz", "SPEDNFE"	        ,0,3},; 
                	   { "Nota Fiscal Servico", "FISA022"	,0,3}}	
-        
         
         aItem := {{ "Cupom Fiscal", aSubI1 ,0,3},; 
         	  { "Nota Fiscal" , aSubI2 ,0,3} } 
