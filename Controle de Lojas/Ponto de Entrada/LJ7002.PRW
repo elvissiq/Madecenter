@@ -34,7 +34,7 @@ Retorno:
 Nenhum
 --------------------------------------------------------------------------
   @history
-  17/10/2024 - Desenvolvimento da Rotina.
+  22/11/2024 - Desenvolvimento da Rotina.
 /*/
 
 User Function LJ7002()
@@ -46,10 +46,10 @@ User Function LJ7002()
   Local aBankBXCH := FormatIn(SuperGetMV("MV_XBANKCH",.F.,""),"/")
   Local aBXTitCH  := {}
   Local cQry      := ""
-  Local _cAlias   := GetNextAlias()
 
   Private lMsHelpAuto := .T.
 	Private lMsErroAuto := .F.
+  Private _cAlias     := GetNextAlias()
 
   If cOpcao == "1" .AND. !(lGrvBatch)
         
@@ -70,6 +70,9 @@ User Function LJ7002()
     cQry += "   AND L2_FILIAL  = '" + SL1->L1_FILIAL + "' "
     cQry += "   AND L2_NUM     = '" + SL1->L1_NUM  + "' "
     cQuery := ChangeQuery(cQry)
+    IF Select(_cAlias) <> 0
+      (_cAlias)->(DbCloseArea())
+    EndIf
     TCQuery cQry ALIAS (_cAlias) NEW
 
     dbSelectArea(_cAlias)
@@ -86,7 +89,9 @@ User Function LJ7002()
       EndIf
     End
 
-    (_cAlias)->(DBCloseArea())
+    IF Select(_cAlias) <> 0
+      (_cAlias)->(DbCloseArea())
+    EndIf
 
     //================================================================
   EndIf
@@ -103,6 +108,9 @@ User Function LJ7002()
   cQry += "   AND E1_LOJA    = '" + SL1->L1_LOJA + "' "
   cQry += "   AND E1_TIPO    = 'CH' "
   cQuery := ChangeQuery(cQry)
+  IF Select(_cAlias) <> 0
+    (_cAlias)->(DbCloseArea())
+  EndIf
   TCQuery cQry ALIAS (_cAlias) NEW
   
   While (_cAlias)->(!Eof()) .AND. !Empty(aBankBXCH)
@@ -127,7 +135,9 @@ User Function LJ7002()
     (_cAlias)->(DBSkip())
   End
 
-  (_cAlias)->(DBCloseArea())
+  IF Select(_cAlias) <> 0
+    (_cAlias)->(DbCloseArea())
+  EndIf
   //================================================================
 
   RecLock("SL1",.F.)
