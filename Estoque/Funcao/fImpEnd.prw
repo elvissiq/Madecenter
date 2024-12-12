@@ -1,5 +1,7 @@
 #INCLUDE "Totvs.ch"
 #INCLUDE "Protheus.ch"
+#Include "TOPCONN.ch"
+#Include 'FWMVCDef.ch'
 
 User Function fImpEnd()
     Local aArea  := FWGetArea()
@@ -56,7 +58,9 @@ Static Function fnLerArq()
                 TMP->TP_PRODUTO := AllTrim(aDados[2])
                 TMP->TP_NUMSEQ  := AllTrim(aDados[3])
                 TMP->TP_LOCALIZ := AllTrim(aDados[4])
+                IF Len(aDados) == 5
                 TMP->TP_QUANT   := Val(aDados[5])
+                EndIF
             TMP->(MsUnlock())
         FT_FSKIP()
         EndIF 
@@ -99,7 +103,9 @@ Static Function fMta265I()
         aAdd(aLinha, {"DB_ESTORNO"," "                     ,Nil })
         aAdd(aLinha, {"DB_LOCALIZ",AllTrim(TMP->TP_LOCALIZ),Nil })
         aAdd(aLinha, {"DB_DATA"   ,dDataBase               ,Nil })
+        If !Empty(TMP->TP_QUANT)
         aAdd(aLinha, {"DB_QUANT"  ,TMP->TP_QUANT           ,Nil })
+        EndIF
         aAdd(aItem,aLinha)
 
         lMsErroAuto := .F.
@@ -117,5 +123,61 @@ Static Function fMta265I()
     End 
 
     oTabTMP:Delete()
+
+Return
+
+User Function fMata220()
+    Local aVetor  := {}
+    Local cQry    := {}
+    Local _cAlias := GetNextAlias()
+    Local nAtual  := 0
+    Local nTotal  := 0
+
+    Private lMSHelpAuto := .T.
+    Private lAutoErrNoFile := .T.
+    Private lMsErroAuto := .F.
+
+    cQry := " SELECT SB2.B2_FILIAL, SB2.B2_COD, SB2.B2_LOCAL, SB2.B2_QFIM FROM "+RetSQLName("SB2")+" SB2 "
+    cQry += " INNER JOIN "+RetSQLName("SDA")+" SDA ON SDA.DA_PRODUTO = SB2.B2_COD "
+    cQry += " WHERE SB2.D_E_L_E_T_ <> '*' "
+    cQry += " AND SB2.B2_FILIAL = '"+ xFilial("SB2") + "' "
+    cQry += " AND SB2.B2_QFIM = SDA.DA_SALDO "
+    cQry += " AND SDA.D_E_L_E_T_ <> '*' "
+    cQry += " AND SDA.DA_FILIAL = '"+ xFilial("SDA") + "' "
+    cQry += " AND SDA.DA_SALDO > 0 "
+    cQry := ChangeQuery(cQry)
+    TCQuery cQry ALIAS (_cAlias) NEW
+
+    Count To nTotal
+    ProcRegua(nTotal)
+    (_cAlias)->(DbGoTop())
+    
+    While (_cAlias)->(!Eof())
+
+        nAtual++
+
+        IncProc("Integrando dados, registro " + cValToChar(nAtual) + " de " + cValToChar(nTotal) + "...")
+
+        aVetor := {}
+        aAdd(aVetor,{"B9_FILIAL", (_cAlias)->B2_FILIAL, Nil})
+        aAdd(aVetor,{"B9_COD"   , (_cAlias)->B2_COD   , Nil})
+        aAdd(aVetor,{"B9_LOCAL" , (_cAlias)->B2_LOCAL , Nil})
+        aAdd(aVetor,{"B9_QINI"  , (_cAlias)->B2_QFIM  , Nil})
+        
+        lMsErroAuto := .F. 
+        
+        Begin Transaction
+            MSExecAuto({|x, y| Mata220(x, y)}, aVetor, 5)
+            
+            If lMsErroAuto
+                MostraErro()
+                DisarmTransaction()
+            EndIf
+        End Transaction
+        
+    (_cAlias)->(DBSkip())
+    End 
+
+    (_cAlias)->(DBCloseArea())
 
 Return

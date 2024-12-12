@@ -8,5 +8,6 @@
  *------------------------------------------------------------------------------------------------------*/
  
 User Function MTA265MNU()
+    //aAdd(aRotina, {"Excluir Saldo", "U_fMata220()", 0, 7, 0, Nil})
     aAdd(aRotina, {"Importar", "U_fImpEnd()", 0, 7, 0, Nil})
 Return
