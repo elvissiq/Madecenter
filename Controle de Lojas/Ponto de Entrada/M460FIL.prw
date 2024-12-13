@@ -15,7 +15,9 @@ User Function M460FIL()
     Default cNumPed := ""
 
     If !Empty(cNumPed) 
-        cFilSC9 += "C9_PEDIDO == " + cNumPed
+        cFilSC9 += "C9_PEDIDO == '" + cNumPed + "'"
+    Else
+        cFilSC9 += "C9_PEDIDO >= '000001'"
     EndIF
 
 Return cFilSC9

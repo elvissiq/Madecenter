@@ -59,17 +59,19 @@ oPrint:StartPage()
 			nLin += 20
 			oPrint:Say (nLin, nCol, "Nº Recebimento: " + E5_IDMOVI, oFont16B,,,,PAD_CENTER)
 			nLin += 20
+			oPrint:Say (nLin, nCol, AllTrim(E5_NATUREZ) + " - " + Upper(AllTrim(Posicione("SED",1,xFilial("SED") + E5_NATUREZ, "ED_DESCRIC"))), oFont14B,,,,PAD_CENTER)
+			nLin += 20
 			oPrint:Say (nLin, nCol, "Valor: R$ " + Alltrim(Transform(E5_VALOR,PesqPict( 'SE5', 'E5_VALOR' ))), oFont14B,,,,PAD_CENTER)
 			oPrint:Say (nLin, nCol+110, " ( "+Extenso(E5_VALOR,.F.,1)+" )", oFont10,,,,PAD_CENTER)
 			nLin += 20
 			oPrint:Say (nLin, nCol+350, cMun + Space(2) + Day2Str(Date()) + " de" + Space(2) + MesExtenso(Month(Date())) + " de";
 			 			  + Space(2)	+ Year2Str(Date()),oFont12,,,,PAD_CENTER)
 			nLin += 20
-			oPrint:Say (nLin, nCol+350, "Recebido de: ", oFont12B,,,,PAD_CENTER)
+			oPrint:Say (nLin, nCol+350, "Beneficiado: ", oFont12B,,,,PAD_CENTER)
 			nLin += 15	
 			oPrint:Say (nLin, nCol+350, E5_BENEF , oFont12,,,,PAD_CENTER)
 			nLin += 20
-			oPrint:Say (nLin, nCol+350, "Tesoureiro: ", oFont12B,,,,PAD_CENTER)
+			oPrint:Say (nLin, nCol+350, "Usuário: ", oFont12B,,,,PAD_CENTER)
 			nLin += 15
 			oPrint:Say (nLin, nCol+350, UPPER(UsrFullName(RetCodUsr())), oFont12,,,,PAD_CENTER)
 			nLin += 20
