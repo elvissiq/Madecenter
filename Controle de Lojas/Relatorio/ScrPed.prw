@@ -803,9 +803,12 @@ Static Function SCRPRetPgt()
 							{"DB",0},;	// 12
 							{"PI",0},;	// 13
 							{"OUTRO",0}} // 14
-	
-	IF !Empty(SL1->L1_CREDITO)
-		aVlrFormas[10][02] += SL1->L1_CREDITO
+
+	IF ValType(nL1Credit) == "N"
+		IF !Empty(nL1Credit) //Variavel nL1Credit esta contida no fonte STIMPSALE.prw
+			aVlrFormas[10][02] += nL1Credit
+			nL1Credit := 0
+		EndIF
 	EndIF
 
 	SL4->(dbSetOrder(1))

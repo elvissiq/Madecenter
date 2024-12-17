@@ -680,8 +680,12 @@ Static Function fMontDupl()
 
 	TCQuery cQry New Alias "QRY_SL4"
 
+		IF !Empty(SL1->L1_CREDITO)
+			AAdd( aDuplicatas, {dDataBase, (SL1->L1_CREDITO),"CR"})
+		EndIF
+
 		While ! QRY_SL4->(EoF())
-			AAdd( aDuplicatas, {SToD(QRY_SL4->L4_DATA), (QRY_SL4->L4_VALOR - QRY_SL4->L4_TROCO), PesqPict("SL4", "L4_VALOR"),Alltrim(QRY_SL4->L4_FORMA)})	
+			AAdd( aDuplicatas, {SToD(QRY_SL4->L4_DATA), (QRY_SL4->L4_VALOR - QRY_SL4->L4_TROCO),Alltrim(QRY_SL4->L4_FORMA)})	
 		 QRY_SL4->(dbSkip())
 		Enddo
 
@@ -701,6 +705,12 @@ Static Function fImpDupl()
 	Local nLinDupAux    := 0
 	Local nLinLim 		:= nLinAtu + ((nLinhas+1)*7) + nTamFundo
 	Local nColAux 		:= nColIni
+	Local aParcelas     := {}
+	Local nPosCC        := 0
+	Local nPosFI        := 0
+	Local nPosBO        := 0
+	Local nPosBOL       := 0
+	Local nPosCA        := 0
 	nLinAtu += 020
 	
 	//Se atingir o fim da Pagina, quebra
@@ -716,12 +726,59 @@ Static Function fImpDupl()
 	nLinAtu += 005
 	nLinDup := nLinAtu
 
-	//Percorre as duplicatas
 	For nAtual := 1 To Len(aDuplicatas)
-		oPrintPvt:SayAlign(nLinDup, nColAux+0005, StrZero(nAtual, 2)+;
-									", no dia "+ DToC(aDuplicatas[nAtual][1]) +": "+;
-									aDuplicatas[nAtual][4]+" "+;
-									Alltrim(Transform(aDuplicatas[nAtual][2], cMaskVlr)) ,	oFontCab,  150, 07, , nPadLeft, )
+		nPosCC  := aScan(aParcelas, {|x| AllTrim(x[4]) == "CC"})
+		nPosFI  := aScan(aParcelas, {|x| AllTrim(x[4]) == "FI"})
+		nPosBO  := aScan(aParcelas, {|x| AllTrim(x[4]) == "BO"})
+		nPosBOL := aScan(aParcelas, {|x| AllTrim(x[4]) == "BOL"})
+		nPosCA  := aScan(aParcelas, {|x| AllTrim(x[4]) == "CA"})
+		
+		IF Empty(nPosCC) .And. aDuplicatas[nAtual][3] == "CC"
+			aAdd(aParcelas,{1,AllTrim(FWGetSX5("24","CC","pt-br")[1,4]),aDuplicatas[nAtual][2],aDuplicatas[nAtual][3]})
+		ElseIF AllTrim(aDuplicatas[nAtual][3]) == "CC"
+			aParcelas[nPosCC][1] += 1
+			aParcelas[nPosCC][3] += aDuplicatas[nAtual][2]
+		EndIF 
+
+		IF Empty(nPosFI) .And. aDuplicatas[nAtual][3] == "FI"
+			aAdd(aParcelas,{1,"BOLETO",aDuplicatas[nAtual][2],aDuplicatas[nAtual][3]})
+		ElseIF AllTrim(aDuplicatas[nAtual][3]) == "FI"
+			aParcelas[nPosFI][1] += 1
+			aParcelas[nPosFI][1] += aDuplicatas[nAtual][2]
+		EndIF
+
+		IF Empty(nPosBO) .And. aDuplicatas[nAtual][3] == "BO"
+			aAdd(aParcelas,{1,AllTrim(FWGetSX5("24","BO","pt-br")[1,4]),aDuplicatas[nAtual][2],aDuplicatas[nAtual][3]})
+		ElseIF AllTrim(aDuplicatas[nAtual][3]) == "BO"
+			aParcelas[nPosBO][1] += 1
+			aParcelas[nPosBO][1] += aDuplicatas[nAtual][2]
+		EndIF
+
+		IF Empty(nPosBOL) .And. aDuplicatas[nAtual][3] == "BOL"
+			aAdd(aParcelas,{1,AllTrim(FWGetSX5("24","BOL","pt-br")[1,4]),aDuplicatas[nAtual][2],aDuplicatas[nAtual][3]})
+		ElseIF AllTrim(aDuplicatas[nAtual][3]) == "BOL"
+			aParcelas[nPosBOL][1] += 1
+			aParcelas[nPosBOL][1] += aDuplicatas[nAtual][2]
+		EndIF
+
+		IF Empty(nPosCA) .And. aDuplicatas[nAtual][3] == "CA"
+			aAdd(aParcelas,{1,AllTrim(FWGetSX5("24","CA","pt-br")[1,4]),aDuplicatas[nAtual][2],aDuplicatas[nAtual][3]})
+		ElseIF AllTrim(aDuplicatas[nAtual][3]) == "CA"
+			aParcelas[nPosCA][1] += 1
+			aParcelas[nPosCA][1] += aDuplicatas[nAtual][2]
+		EndIF
+
+		IF !(aDuplicatas[nAtual][3] $("CC/FI/BO/BOL/CA"))
+			aAdd(aParcelas,{0,AllTrim(FWGetSX5("24",aDuplicatas[nAtual][3],"pt-br")[1,4]),aDuplicatas[nAtual][2],aDuplicatas[nAtual][3]})
+		EndIF
+	Next 
+
+	//Percorre as duplicatas
+	For nAtual := 1 To Len(aParcelas)
+		oPrintPvt:SayAlign(nLinDup, nColAux+0005, StrZero(nAtual, 2)+" - "+;
+									"R$ "+ Alltrim(Transform(aParcelas[nAtual][3], cMaskVlr)) +;
+									IIF(!Empty(aParcelas[nAtual][1])," em "+ cValToChar(aParcelas[nAtual][1])+"X no ","em ") +;
+									aParcelas[nAtual][2],	oFontCab,  500, 07, , nPadLeft, )
 		nLinDup += 7
 		nLinDupAux += 5
 
