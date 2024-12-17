@@ -777,7 +777,7 @@ Static Function fImpDupl()
 	For nAtual := 1 To Len(aParcelas)
 		oPrintPvt:SayAlign(nLinDup, nColAux+0005, StrZero(nAtual, 2)+" - "+;
 									"R$ "+ Alltrim(Transform(aParcelas[nAtual][3], cMaskVlr)) +;
-									IIF(!Empty(aParcelas[nAtual][1])," em "+ cValToChar(aParcelas[nAtual][1])+"X no ","em ") +;
+									IIF(!Empty(aParcelas[nAtual][1])," em "+ cValToChar(aParcelas[nAtual][1])+"X no "," em ") +;
 									aParcelas[nAtual][2],	oFontCab,  500, 07, , nPadLeft, )
 		nLinDup += 7
 		nLinDupAux += 5
