@@ -1,5 +1,6 @@
 #INCLUDE "RWMAKE.CH" 
 
+Static nL1Credit := 0
 User Function SCRPED()   
 
 	Local aArea 			:= FWGetArea()

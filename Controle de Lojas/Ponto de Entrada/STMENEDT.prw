@@ -20,7 +20,7 @@ User Function StMenEdt()
 	Local aRetor 	:= {}
 	Local nJ	 	:= 0
 	Local nH	 	:= 0
-	Local cExMenu 	:= "Cadastro de Clientes/Vale Troca/Recebimento de Titulo/Estorno de titulos/Cancelar Recebimento/Estorno de Titulos"
+	Local cExMenu 	:= "Cadastro de Clientes/Vale Troca"
 	Local cMenu	 	:= ""
 	
 	For nJ := 1 to Len(ParamIXB)
