@@ -15,6 +15,7 @@ User Function LJ7016
     aAtalho := Lj7Atalho(nAtalho)
     AADD( aFunAtt,{"Hist. Cliente","Hist. Cliente","RELATORIO",{|| U_MLJF01()}, .F., .T., 4, aAtalho }) //Historico do Cliente
     AADD( aFunAtt,{"Cred. Correntista","Cred. Correntista","RELATORIO",{|| U_MLJF06()}, .F., .T., 4, aAtalho }) //Crédito Correntista
+    AADD( aFunAtt,{"Pesq. Reserva","Pesq. Reserva","RELATORIO",{|| MATA430()}, .F., .T., 4, aAtalho }) //Controle de Reserva
 
 Return(aFunAtt)
 

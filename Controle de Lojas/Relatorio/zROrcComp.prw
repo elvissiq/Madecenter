@@ -180,7 +180,7 @@ Static Function fMontaRel(oProc)
 	cQryPed += "    L1_COND, "                                   + CRLF
 	cQryPed += "    L1_TRANSP, "                                 + CRLF
 	cQryPed += "    L1_VEND, "                                   + CRLF
-	cQryPed += "    ISNULL(A3_NREDUZ, '') AS A3_NREDUZ, "        + CRLF
+	cQryPed += "    ISNULL(A3_NOME, '') AS A3_NOME, "            + CRLF
 	cQryPed += "    ISNULL(A3_DDDTEL, '') AS A3_DDDTEL, "      	 + CRLF
 	cQryPed += "    ISNULL(A3_TEL, '') AS A3_TEL, "       		 + CRLF
 	cQryPed += "    ISNULL(A3_EMAIL, '') AS A3_EMAIL, "       	 + CRLF
@@ -499,7 +499,7 @@ Static Function fImpCab()
 	oPrintPvt:Line(nLinCab, nColIni, nLinCab, nColFin)
 	nLinCab += 005
 	oPrintPvt:SayAlign(nLinCab, nColIni+5, "Vendedor:",                                     oFontCabN, 200, 07, , nPadLeft, )
-	oPrintPvt:SayAlign(nLinCab, nColIni+50, QRY_PED->L1_VEND + " - "+QRY_PED->A3_NREDUZ,    oFontCab,  500, 07, , nPadLeft, )
+	oPrintPvt:SayAlign(nLinCab, nColIni+50, QRY_PED->L1_VEND + " - "+QRY_PED->A3_NOME,      oFontCab,  500, 07, , nPadLeft, )
 	nLinCab += 010
 	oPrintPvt:SayAlign(nLinCab, nColIni+5, "Telefone:",	                                    oFontCabN, 200, 07, , nPadLeft, )
 	oPrintPvt:SayAlign(nLinCab, nColIni+043,Alltrim(QRY_PED->A3_DDDTEL)+" "+;

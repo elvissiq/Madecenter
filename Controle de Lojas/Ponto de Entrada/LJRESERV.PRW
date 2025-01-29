@@ -57,43 +57,43 @@ Static Function fSelectLj()
   Local oTodasLojas
   Local oProdutos
   Local oTodosProds
-  Local oOk 			  := LoadBitmap(GetResources(), "LBOK")
-  Local oNo 			  := LoadBitmap(GetResources(), "LBNO")
+  Local oOk 		:= LoadBitmap(GetResources(), "LBOK")
+  Local oNo 		:= LoadBitmap(GetResources(), "LBNO")
   Local lTodasLojas	:= .F.
   Local lTodosProds	:= .F.
-  Local nX
+  //Local nX
 
-	DEFINE MSDIALOG oDlgConsulta TITLE "Identificação de lojas" FROM 0,0 TO 300,490 PIXEL OF oDlgVA
+	DEFINE MSDIALOG oDlgConsulta TITLE "Consulta de Estoques / Identificação de lojas" FROM 0,0 TO 300,490 PIXEL OF oDlgVA
 			
-		@ 08,08 LISTBOX oLojas FIELDS HEADER "","Loja" FIELDSIZES 14,130 SIZE 230,55 PIXEL /*FONT "Arial"*/ OF oDlgConsulta
+		@ 08,08 LISTBOX oLojas FIELDS HEADER "","Loja" FIELDSIZES 14,130 SIZE 230,55 PIXEL FONT aFontes[3] OF oDlgConsulta
 		oLojas:SetArray(aLojas)
 		oLojas:bLDblClick := {|| (aLojas[oLojas:nAt,1] := !aLojas[oLojas:nAt,1]) }
 		oLojas:bLine := {|| {If(aLojas[oLojas:nAt,1],oOk,oNo),aLojas[oLojas:nAt,3] }}
-			
+		
 		@ 65,12 CHECKBOX oTodasLojas VAR lTodasLojas PROMPT "Selecionar Todas" SIZE 53,8 PIXEL OF oDlgConsulta;
 		ON CHANGE {|| aEval(aLojas,{|x| x[1]:= lTodasLojas }),oLojas:Refresh() }
-			
-		@ 75,08 LISTBOX oProdutos FIELDS HEADER "","Codigo","Descrição","Quant." FIELDSIZES 14,40,123,40 SIZE 230,55 PIXEL /*FONT "Arial"*/ OF oDlgConsulta
+		
+		@ 75,08 LISTBOX oProdutos FIELDS HEADER "","Codigo","Descrição","Quant." FIELDSIZES 14,40,123,40 SIZE 230,55 PIXEL FONT aFontes[3] OF oDlgConsulta
 		oProdutos:SetArray(aProdutos)
 		oProdutos:bLDblClick := {|| (aProdutos[oProdutos:nAt,1] := !aProdutos[oProdutos:nAt,1])}
 		oProdutos:bLine := {|| {If(aProdutos[oProdutos:nAt,1],oOk,oNo),;
 		aProdutos[oProdutos:nAt,3],aProdutos[oProdutos:nAt,4],;
 		Transform(aProdutos[oProdutos:nAt,5],PesqPict("SL2","L2_QUANT")) }}
-			
+		
 		@ 133,12 CHECKBOX oTodosProds VAR lTodosProds PROMPT "Selecionar Todos" SIZE 53,8 PIXEL OF oDlgConsulta;
 		ON CHANGE {|| aEval(aProdutos,{|x| x[1]:= lTodosProds }),oProdutos:Refresh() }
-			
+		
 		DEFINE SBUTTON FROM 133, 180 TYPE 1 ACTION (lContinua := .T. ,oDlgConsulta:End()) ENABLE PIXEL OF oDlgConsulta
 		DEFINE SBUTTON FROM 133, 210 TYPE 2 ACTION oDlgConsulta:End() ENABLE PIXEL OF oDlgConsulta
 			
 	ACTIVATE MSDIALOG oDlgConsulta CENTERED
   
-  //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-  //³ Limpa os arrays aLojas e aProdutos. Deixa so os que foram selecionados   ³
-  //ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-
-  nCont := 0
-  For nX := Len(aLojas) to 1 Step -1
+  	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+  	//³ Limpa os arrays aLojas e aProdutos. Deixa so os que foram selecionados   ³
+  	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	/*
+  	nCont := 0
+  	For nX := Len(aLojas) to 1 Step -1
 		If !aLojas[nX][1]
 			aDel( aLojas, nX )
 			nCont ++
@@ -121,7 +121,7 @@ Static Function fSelectLj()
 		Aviso( "Atenção", "Não foi selecionado nenhum produto para consulta", {"Ok"} )
 		lContinua := .F.
 	Endif
-
+	*/
 Return
 
 /*/{Protheus.doc} fReserv

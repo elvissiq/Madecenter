@@ -425,7 +425,7 @@ Static Function fCompRet(pPos)
 	sTexto:= sTexto +'<ce> CNPJ: '+ alltrim(cCgcEnt) + ' IE: '+ alltrim(cInsEnt) +'</ce>'+ Chr(13)+ Chr(10)
 
 	sTexto:= sTexto + Replicate("-", nMaxChar)						   		+ Chr(13)+ Chr(10)
-	sTexto:= sTexto + '<b><ce>COMPROVANTE DE RETIRA '+cComprov+'</ce></b>' 	+ Chr(13)+ Chr(10)
+	sTexto:= sTexto + '<b><ce>COMPROVANTE DE RETIRADA '+cComprov+'</ce></b>' 	+ Chr(13)+ Chr(10)
 	sTexto:= sTexto + Replicate("-", nMaxChar)						   		+ Chr(13)+ Chr(10)
 	sTexto:= sTexto + 'Codigo         Descricao' 					   		+ Chr(13)+ Chr(10)
 	sTexto:= sTexto + 'Qtd            VlrUnit              VlrTot'    		+ Chr(13)+ Chr(10)
