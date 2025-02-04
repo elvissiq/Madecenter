@@ -83,6 +83,8 @@ User Function SCRRPS()
 	Local nLinMsg  		:= 0
 	Local nY       		:= 0
 
+	Private nFatorRes		:= 1
+	
 	Private aVlrFormas		:= SCRPRetPgt()	// Resgata os valores de cada forma de pagamento
 
 	If FindClass("FWSM0Util") //Proteção, para ambiente com RPO Ctree essa função não existe
@@ -124,20 +126,20 @@ User Function SCRRPS()
 	sTexto:= sTexto+ 'Qtd             VlrUnit                 VlrTot'+Chr(13)+Chr(10)
 	sTexto:= sTexto+'-----------------------------------------------'+Chr(13)+Chr(10)
 	cOrcam		:= SL1->L1_NUM
-	nDinheir	:= (nFatorRes * aVlrFormas[01][02] )
-	nCheques	:= (nFatorRes * aVlrFormas[02][02] )
-	nCartaoC 	:= (nFatorRes * aVlrFormas[03][02] )
-	nCartaoD 	:= (nFatorRes * aVlrFormas[04][02] )
-	nPIX	 	:= (nFatorRes * aVlrFormas[05][02] )
-	nCartDig 	:= (nFatorRes * aVlrFormas[06][02] )
-	nFinanc		:= (nFatorRes * aVlrFormas[07][02] )
-	nConveni	:= (nFatorRes * aVlrFormas[08][02] )
-	nVales  	:= (nFatorRes * aVlrFormas[09][02] )
-	nCredito	:= (nFatorRes * aVlrFormas[10][02] )
-	nCarteir	:= (nFatorRes * aVlrFormas[11][02] )
-	nDeposit	:= (nFatorRes * aVlrFormas[12][02] )
-	nPIXManu	:= (nFatorRes * aVlrFormas[13][02] )
-	nOutros		:= (nFatorRes * aVlrFormas[14][02] )
+	nDinheir	:= (nFatorRPS * aVlrFormas[01][02] )
+	nCheques	:= (nFatorRPS * aVlrFormas[02][02] )
+	nCartaoC 	:= (nFatorRPS * aVlrFormas[03][02] )
+	nCartaoD 	:= (nFatorRPS * aVlrFormas[04][02] )
+	nPIX	 	:= (nFatorRPS * aVlrFormas[05][02] )
+	nCartDig 	:= (nFatorRPS * aVlrFormas[06][02] )
+	nFinanc		:= (nFatorRPS * aVlrFormas[07][02] )
+	nConveni	:= (nFatorRPS * aVlrFormas[08][02] )
+	nVales  	:= (nFatorRPS * aVlrFormas[09][02] )
+	nCredito	:= (nFatorRPS * aVlrFormas[10][02] )
+	nCarteir	:= (nFatorRPS * aVlrFormas[11][02] )
+	nDeposit	:= (nFatorRPS * aVlrFormas[12][02] )
+	nPIXManu	:= (nFatorRPS * aVlrFormas[13][02] )
+	nOutros		:= (nFatorRPS * aVlrFormas[14][02] )
 	nAbtoPCC	:= (nFatorRPS * SL1->L1_ABTOPCC)
 	nAbtoISS	:= RetAbatIss()	//Abatimento de ISS
 
