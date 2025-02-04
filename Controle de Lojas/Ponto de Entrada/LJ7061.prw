@@ -13,16 +13,19 @@ PE LJ7061 - Ponto de Entrada chamado para validações na digitação do código
 User Function LJ7061()
 	
 	Local lRet := .T.
+	Local nPosEnt := aScan(aHeader, {|x| Alltrim(x[2])=="LR_ENTREGA" })
+	Local lProdSV := AllTrim(SB1->B1_TIPO) == 'SV'
+	/*
 	Local nPosPro := aScan(aHeader, {|x| Alltrim(x[2])=="LR_PRODUTO" })
 	Local nPosDes := aScan(aHeader, {|x| Alltrim(x[2])=="LR_DESCRI" })
-	Local nPosEnt := aScan(aHeader, {|x| Alltrim(x[2])=="LR_ENTREGA" })
 	Local cCodPro := aCOLS[N][nPosPro]
 	Local cDescPr := AllTrim(aCOLS[N][nPosDes])
-	Local lProdSV := ( AllTrim(Posicione("SB1",1,xFilial("SB1")+cCodPro,"B1_TIPO")) == 'SV' )
 	Local nY 
+	*/
 
 	DeFault lNota := .F.
 
+	/*
 	For nY := 1 To Len(aCOLS)
 		IF nY != N .And. (aCOLS[N][Len(aCOLS[N])])
 			IF aCOLS[nY][nPosPro] == aCOLS[N][nPosPro]
@@ -31,13 +34,14 @@ User Function LJ7061()
 			EndIF
 		EndIF 
 	Next 
+	*/
 
-	IF lRet .And. lProdSV
-		aCOLS[N][nPosEnt] := '2'
-	EndIF  
-
-	IF lRet .And. lNota
-		aCOLS[N][nPosEnt] := '3'
+	If lRet
+		If lProdSV
+			aCOLS[N][nPosEnt] := '2'
+		ElseIF lNota
+			aCOLS[N][nPosEnt] := '3'
+		EndIF 
 	EndIF 
 
 Return lRet

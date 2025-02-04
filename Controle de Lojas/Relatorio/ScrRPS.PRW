@@ -93,6 +93,9 @@ User Function SCRRPS()
 	If Len(aDadosRPS[02]) > 0
 		cNumRPS	:= aDadosRPS[02][01]	//Número do RPS
 		cSerRPS	:= aDadosRPS[02][02]	//Série do RPS
+	Else
+		cNumRPS	:= SL1->L1_DOCRPS		//Número do RPS
+		cSerRPS	:= SL1->L1_SERRPS		//Série do RPS	
 	EndIf
 	nFatorRPS 	:= aDadosRPS[03]		//Fator de Cálculo (proporcional da venda) referente aos itens de serviço (RPS)
 
@@ -103,11 +106,16 @@ User Function SCRRPS()
 
 	sTexto := sTexto + '==============================================='	+Chr(13)+Chr(10)
 	sTexto := sTexto + '      RECIBO PROVISORIO DE SERVICOS (RPS)      '	+Chr(13)+Chr(10)
+	If !Empty(cNumRPS)
+		sTexto := sTexto + 'Sereie RPS: ' + AllTrim(cSerRPS)	+Chr(13)+Chr(10)
+		sTexto := sTexto + 'Numero RPS: ' + AllTrim(cNumRPS)	+Chr(13)+Chr(10)
+	EndIF 	
 	sTexto := sTexto + '==============================================='	+Chr(13)+Chr(10)
 
 	// Tratativa municipio Aquiraz - CE
 	IF lRPSOK .AND. ( (!Empty(aFilCodMun[1][2]) .AND. AllTrim(aFilCodMun[1][2]) == "2301000") .OR.;
 		!Empty(aFilCodMun[2][2]) .AND. Upper(AllTrim(aFilCodMun[2][2])) == "AQUIRAZ" )
+		sTexto := sTexto + 'Sereie RPS                    ' + AllTrim(cSerRPS)	+Chr(13)+Chr(10)
 		sTexto := sTexto + 'Numero RPS                    ' + AllTrim(cNumRPS)	+Chr(13)+Chr(10)
 		sTexto := sTexto + '-----------------------------------------------'	+Chr(13)+Chr(10)
 	EndIf

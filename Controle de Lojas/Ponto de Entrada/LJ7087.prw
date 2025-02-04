@@ -10,8 +10,15 @@
 
 User Function LJ7087()
   Local nRet := 0 //0 = Verifica emissao (padrão) / 1 = Emissão de CF ou NFC-e / 2 = Emissao de nota
-  
+  Local cFilNF := SuperGetMV("MV_XFILNF",.F.,"020101")
+
   Public lNota := .F. 
+
+  If xFilial("SL1") $(cFilNF)
+    nRet := 2
+    lNota := .T.
+    Return nRet
+  EndIF 
 
   If !LjProfile(3) .And. !(IsInCallStack("STIPOSMAIN"))
     nRet := Aviso( "Documento Fiscal de Saida" ,"Qual Documento Fiscal de Saida sera impresso na venda?",{"NFC-e","Nota"})
