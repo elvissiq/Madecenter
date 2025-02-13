@@ -34,7 +34,6 @@ User Function MLJF06()
 
   aAdd(aFields1,{"T1_CLIENT","C", FWTamSX3("A1_CGC")[1]    , FWTamSX3("A1_CGC")[2]    , "Código ou CNPJ/CPF" ,"","XSA1",Nil})
   aAdd(aFields1,{"T1_NOMCLI","C", FWTamSX3("A1_NOME")[1]   , FWTamSX3("A1_NOME")[2]   , "Nome Cliente"       ,"","",Nil    })
-  aAdd(aFields1,{"T1_TIPO"  ,"C", 1                        , 0                        , "Tipo"               ,"","","C=Credito Correntista;D=Credito Devolucao" })
   
   oTabTMP1:SetFields(aFields1)
   oTabTMP1:AddIndex("01", {"T1_CLIENT"})
@@ -45,6 +44,8 @@ User Function MLJF06()
   aAdd(aFields2,{"T2_NOMFIL"  ,"C", 50                        , 0                         , "Nome Filial"   ,"","",Nil})
   aAdd(aFields2,{"T2_PREFIXO" ,"C", FWTamSX3("E1_PREFIXO")[1] , FWTamSX3("E1_PREFIXO")[2] , "Prefixo"       ,"","",Nil})
   aAdd(aFields2,{"T2_NUM"     ,"C", FWTamSX3("E1_NUM")[1]     , FWTamSX3("E1_NUM")[2]     , "Num. Credito"  ,"","",Nil})
+  aAdd(aFields2,{"T2_TIPO"    ,"C", FWTamSX3("E1_TIPO")[1]    , FWTamSX3("E1_TIPO")[2]    , "Tipo Credito"  ,"","",Nil})
+  aAdd(aFields2,{"T2_ORIGEM"  ,"C", FWTamSX3("E1_ORIGEM")[1]  , FWTamSX3("E1_ORIGEM")[2]  , "Origem"        ,"","",Nil})
   aAdd(aFields2,{"T2_VALOR"   ,"N", FWTamSX3("E1_VALOR")[1]   , FWTamSX3("E1_VALOR")[2]   , "Valor"         ,PesqPict("SE1", "E1_VALOR"),"",Nil})
   aAdd(aFields2,{"T2_SALDO"   ,"N", FWTamSX3("E1_SALDO")[1]   , FWTamSX3("E1_SALDO")[2]   , "Saldo"         ,PesqPict("SE1", "E1_SALDO"),"",Nil})
   aAdd(aFields2,{"T2_EMISSAO" ,"D", FWTamSX3("E1_EMISSAO")[1] , FWTamSX3("E1_EMISSAO")[2] , "Emissao"       ,"","",Nil})
@@ -75,7 +76,6 @@ Static Function ModelDef()
   Local oStrTMP2 := fnM01TMP('2')
 
   oStrTMP1:AddTrigger("T1_CLIENT", "T1_NOMCLI" ,{||.T.},{|oStrTMP1| fBusNCli(oStrTMP1) })
-  oStrTMP1:AddTrigger("T1_CLIENT", "T1_TIPO"   ,{||.T.},{|| "C" })
 
   oModel := MPFormModel():New('MLJF06M',/*bPre*/,/*bPost*/,/*bCommit*/,/*bCancel*/)
   oModel:AddFields('T1MASTER',/*cOwner*/,oStrTMP1,/*bPre*/,/*bPos*/,/*bLoad*/)
@@ -203,7 +203,7 @@ Return oView
 Static Function fnV01TMP(cTab)
   Local oViewTMP := FWFormViewStruct():New() 
   Local cField := "aFields"+cTab
-  Local cCampLib := "T1_CLIENT/T1_TIPO"
+  Local cCampLib := "T1_CLIENT"
   Local lLibEdit := .F.
   Local aCombo := {}
   Local nId
@@ -260,12 +260,7 @@ Static Function fConsulta(oView)
     cQry += " INNER JOIN SYS_COMPANY SM0 ON SM0.M0_CODFIL = SE1.E1_FILIAL "
     cQry += " INNER JOIN "+RetSQLName("SA1")+" SA1 ON SA1.A1_COD = SE1.E1_CLIENTE "
     cQry += " WHERE SE1.D_E_L_E_T_ <> '*' "
-    If oModelTMP1:GetValue("T1_TIPO") == "C" 
-      cQry += " 	AND SE1.E1_ORIGEM = 'STIPOSMA' "
-    Else
-      cQry += " 	AND SE1.E1_ORIGEM <> 'STIPOSMA' "
-    EndIF 
-    cQry += " 	AND SE1.E1_TIPO   = 'NCC' "
+    cQry += " 	AND SE1.E1_TIPO   IN ('NCC','RA') "
     cQry += " 	AND SM0.D_E_L_E_T_ <> '*' "
     cQry += " 	AND SA1.D_E_L_E_T_ <> '*' "
     cQry += " 	AND SA1.A1_FILIAL = '" + xFilial("SA1") + "'"
@@ -283,6 +278,8 @@ Static Function fConsulta(oView)
         EndIF 
 
         Do Case
+          Case AllTrim((_cAlias)->E1_TIPO) == "RA"
+            oModelTMP2:LoadValue("T2_LEGEND", "BR_BRANCO"   )
           Case (_cAlias)->E1_VALOR == (_cAlias)->E1_SALDO
             oModelTMP2:LoadValue("T2_LEGEND", "BR_VERDE"    )
           Case Empty((_cAlias)->E1_SALDO)
@@ -295,6 +292,17 @@ Static Function fConsulta(oView)
         oModelTMP2:LoadValue("T2_NOMFIL"  , (_cAlias)->M0_FILIAL        )
         oModelTMP2:LoadValue("T2_PREFIXO" , (_cAlias)->E1_PREFIXO       )
         oModelTMP2:LoadValue("T2_NUM"     , (_cAlias)->E1_NUM           )
+        oModelTMP2:LoadValue("T2_TIPO"    , (_cAlias)->E1_TIPO          )
+        Do Case
+          Case AllTrim((_cAlias)->E1_TIPO) == "RA"
+            oModelTMP2:LoadValue("T2_ORIGEM", "ADIANT")
+          Case AllTrim((_cAlias)->E1_TIPO) == "NCC" .And. AllTrim((_cAlias)->E1_ORIGEM) == "LOJA720"
+            oModelTMP2:LoadValue("T2_ORIGEM", "DEVOL")
+          Case AllTrim((_cAlias)->E1_TIPO) == "NCC" .And. AllTrim((_cAlias)->E1_ORIGEM) == "STIPOSMA"
+            oModelTMP2:LoadValue("T2_ORIGEM", "CRED")
+          Case AllTrim((_cAlias)->E1_TIPO) == "NCC" .And. AllTrim((_cAlias)->E1_ORIGEM) $ ("FINA040/FINA740")
+            oModelTMP2:LoadValue("T2_ORIGEM", "FIN")
+        EndCase
         oModelTMP2:LoadValue("T2_VALOR"   , (_cAlias)->E1_VALOR         )
         oModelTMP2:LoadValue("T2_SALDO"   , (_cAlias)->E1_SALDO         )
         oModelTMP2:LoadValue("T2_EMISSAO" , STOD((_cAlias)->E1_EMISSAO) )
@@ -325,12 +333,12 @@ Static Function fOrcamento()
   Local aArea    := FWGetArea()
   Local aAreaSL1 := SL1->(FWGetArea())
   Local oModel := FWModelActive() 
-  Local oModelTMP1 := oModel:GetModel("T1MASTER")
+  Local oModelTMP2 := oModel:GetModel("T2DETAIL")
   Local cChave := ""
 
-  IF oModelTMP1:GetValue("T1_TIPO") == "C" 
+  IF AllTrim(oModelTMP2:GetValue("T2_ORIGEM")) == "CRED" 
     cChave := FWFldGet("T2_PREFIXO") + FWFldGet("T2_NUM")
-  Else
+  ElseIF AllTrim(oModelTMP2:GetValue("T2_ORIGEM")) == "DEVOL" 
     DBSelectArea("SD1")
     SD1->(DBSetOrder(1))
     IF SD1->(MSSeek(xFilial("SD1") + FWFldGet("T2_NUM") + FWFldGet("T2_PREFIXO") ))

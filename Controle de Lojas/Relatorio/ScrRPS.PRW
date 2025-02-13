@@ -261,9 +261,8 @@ User Function SCRRPS()
 	sTexto := sTexto + Replicate("-", nMaxChar)						     + Chr(13) + Chr(10)
 	sTexto := sTexto + ' ' + Chr(13) + Chr(10)
 
-	sTexto := sTexto + '<b><ce>Observacoes:</b></ce> ' + Chr(13) + Chr(10)
-
 	If !Empty(SL1->L1_XMSGI)
+		sTexto := sTexto + '<b><ce>Observacoes:</b></ce> ' + Chr(13) + Chr(10)
 		cMsg    := SL1->L1_XMSGI
 		nLinMsg := MLCount(SL1->L1_XMSGI,nMaxChar)
 
@@ -274,7 +273,7 @@ User Function SCRRPS()
 		sTexto := sTexto + ' ' + Chr(13) + Chr(10)
 	EndIf
 
-	STWManagReportPrint(sTexto,1) //Envia comando para a Impressora
+	//STWManagReportPrint(sTexto,1) //Envia comando para a Impressora
 
 Return sTexto
 
