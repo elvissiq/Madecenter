@@ -17,8 +17,17 @@ Static nPadCenter := 2                                  //Alinhamento Centraliza
 Static nPosCod    := 0000                               //Posição Inicial da Coluna de Código do Produto 
 Static nPosDesc   := 0000                               //Posição Inicial da Coluna de Descrição
 Static nPosUnid   := 0000                               //Posição Inicial da Coluna de Unidade de Medida
+Static nPosUnid2  := 0000                               //Posição Inicial da Coluna de Unidade de Medida
 Static nPosQuan   := 0000                               //Posição Inicial da Coluna de Quantidade
+Static nPosQuan2  := 0000                               //Posição Inicial da Coluna de Quantidade
+Static nPosVlIP   := 0000                               //Posição Inicial da Coluna de Valor do IPI
+Static nPosVlST   := 0000                               //Posição Inicial da Coluna de Valor do ICMS ST
+Static nPosVUni   := 0000                               //Posição Inicial da Coluna de Valor Unitario
+Static nPosVDes   := 0000                               //Posição Inicial da Coluna de Valor Desconto
 Static nPosVTot   := 0000                               //Posição Inicial da Coluna de Valor Total
+Static nPosPacot  := 0000                               //Posição Inicial da Coluna de Quantidade do pacote
+Static nPosVM2    := 0000                               //Posição Inicial da Coluna de Valor do ICMS
+Static nPosIPI    := 0000                               //Posição Inicial da Coluna de Valor do IPI
 Static nTamFundo  := 15                                 //Altura de fundo dos blocos com Titulo
 Static nCorAzul   := RGB(89, 111, 117)                  //Cor Azul usada nos Titulos
 Static cNomeFont  := "Arial"                            //Nome da Fonte padrao
@@ -56,13 +65,9 @@ Local oProcess   := Nil
 
 Private cLogoEmp := fLogoEmp()
 Private cPedido  := SL1->L1_NUM
-Private nQdt2UM  := 0                                  
-Private nQdtPac  := 0                                  
 Private nQdtTot  := 0
 Private nVUnTot  := 0
-Private nQdtTot2 := 0
-Private nPacTot  := 0
-Private nVM2Tot  := 0
+Private nDescont := 0
 Private nIPITot  := 0
 	
 	fLayout()
@@ -92,9 +97,13 @@ Static Function fLayout()
 
 	nPosCod   := 0010 // Codigo do Produto
 	nPosDesc  := 0060 // Descricao
-	nPosUnid  := 0380 // Unidade de Medida 
-	nPosQuan  := 0415 // Quantidade
-	nPosVTot  := 0470 // Valor Total
+	nPosUnid  := 0240 // 1ª Unidade de Medida 
+	nPosQuan  := 0280 // Quantidade 1ª UM
+	nPosVUni  := 0320 // Valor Unitario 1ª UM
+	nPosVDes  := 0370 // Valor do Desconto
+	nPosVlIP  := 0420 // Valor ICMS ST
+	nPosVlST  := 0470 // Valor ICMS ST
+	nPosVTot  := 0520 // Valor Total
 Return
 
 /*---------------------------------------------------------------------*
@@ -113,6 +122,9 @@ Static Function fMontaRel(oProc)
 	Local cQryIte       := ""
 	//Variaveis do relatorio
 	Local cNomeRel      := "Orçamento_venda_"+FunName()+"_"+__cUserID+"_"+dToS(Date())+"_"+StrTran(Time(), ":", "-")
+	Local nVUnit        := 0
+	Local nVlrItem      := 0
+	
 	Private oPrintPvt
 	Private cHoraEx     := Time()
 	Private nPagAtu     := 1
@@ -127,10 +139,9 @@ Static Function fMontaRel(oProc)
 	Private nTotFrete   := 0
 	Private nTotDesp    := 0
 	Private nValorTot   := 0
-	Private nTotalST    := 0
 	Private nTotVal     := 0
 	Private nTotIPI     := 0
-	Private nTotDesc    := 0
+	Private nVSTTot     := 0
 	
 	DbSelectArea("SB1")
 	SB1->(DbSetOrder(1)) //B1_FILIAL+B1_COD
@@ -146,38 +157,38 @@ Static Function fMontaRel(oProc)
 	oPrintPvt:SetMargin(60, 60, 60, 60)
 	
 	//Selecionando os Orçamentos
-	cQryPed := " SELECT "                                        + CRLF
-	cQryPed += "    L1_FILIAL, "                                 + CRLF
-	cQryPed += "    L1_NUM, "                                    + CRLF
-	cQryPed += "    L1_EMISSAO, "                                + CRLF
-	cQryPed += "    L1_CLIENTE, "                                + CRLF
-	cQryPed += "    L1_LOJA, "                                	 + CRLF
-	cQryPed += "    ISNULL(A1_NOME, '') AS A1_NOME, "       	 + CRLF
-	cQryPed += "    ISNULL(A1_NREDUZ, '') AS A1_NREDUZ, "      	 + CRLF
-	cQryPed += "    ISNULL(A1_PESSOA, '') AS A1_PESSOA, "        + CRLF
-	cQryPed += "    ISNULL(A1_CGC, '') AS A1_CGC, "              + CRLF
-	cQryPed += "    ISNULL(A1_END, '') AS A1_END, "              + CRLF
-	cQryPed += "    ISNULL(A1_BAIRRO, '') AS A1_BAIRRO, "        + CRLF
-	cQryPed += "    ISNULL(A1_MUN, '') AS A1_MUN, "              + CRLF
-	cQryPed += "    ISNULL(A1_EST, '') AS A1_EST, "              + CRLF
-	cQryPed += "    ISNULL(A1_DDD, '') AS A1_DDD, "       		 + CRLF
-	cQryPed += "    ISNULL(A1_TEL, '') AS A1_TEL, "       		 + CRLF
-	cQryPed += "    ISNULL(A1_EMAIL, '') AS A1_EMAIL, "       	 + CRLF
-	cQryPed += "    L1_TABELA, "                            	 + CRLF
-	cQryPed += "    L1_COND, "                                   + CRLF
-	cQryPed += "    L1_TRANSP, "                                 + CRLF
-	cQryPed += "    L1_VEND, "                                   + CRLF
-	cQryPed += "    ISNULL(A3_NOME, '') AS A3_NOME, "            + CRLF
-	cQryPed += "    ISNULL(A3_DDDTEL, '') AS A3_DDDTEL, "      	 + CRLF
-	cQryPed += "    ISNULL(A3_TEL, '') AS A3_TEL, "       		 + CRLF
-	cQryPed += "    ISNULL(A3_EMAIL, '') AS A3_EMAIL, "       	 + CRLF
-	cQryPed += "    L1_VLRLIQ, "                                 + CRLF
-	cQryPed += "    L1_TPFRET, "                                 + CRLF
-	cQryPed += "    L1_FRETE, "                                  + CRLF
-	cQryPed += "    L1_PBRUTO, "                                 + CRLF
-	cQryPed += "    L1_MENNOTA, "                                + CRLF
-	cQryPed += "    L1_DESCONT, "                                + CRLF
-	cQryPed += "    L1_VALMERC, "                                + CRLF
+	cQryPed := " SELECT "           + CRLF
+	cQryPed += "    L1_FILIAL, "    + CRLF
+	cQryPed += "    L1_NUM, "       + CRLF
+	cQryPed += "    L1_EMISSAO, "   + CRLF
+	cQryPed += "    L1_CLIENTE, "   + CRLF
+	cQryPed += "    L1_LOJA, "      + CRLF
+	cQryPed += "    A1_NOME, "     	+ CRLF
+	cQryPed += "    A1_NREDUZ, "    + CRLF
+	cQryPed += "    A1_PESSOA, "    + CRLF
+	cQryPed += "    A1_CGC, "       + CRLF
+	cQryPed += "    A1_END, "       + CRLF
+	cQryPed += "    A1_BAIRRO, "    + CRLF
+	cQryPed += "    A1_MUN, "       + CRLF
+	cQryPed += "    A1_EST, "       + CRLF
+	cQryPed += "    A1_DDD, "       + CRLF
+	cQryPed += "    A1_TEL, "       + CRLF
+	cQryPed += "    A1_EMAIL, "     + CRLF
+	cQryPed += "    L1_TABELA, "    + CRLF
+	cQryPed += "    L1_COND, "      + CRLF
+	cQryPed += "    L1_TRANSP, "    + CRLF
+	cQryPed += "    L1_VEND, "      + CRLF
+	cQryPed += "    A3_NREDUZ, "    + CRLF
+	cQryPed += "    A3_DDDTEL, "    + CRLF
+	cQryPed += "    A3_TEL, "       + CRLF
+	cQryPed += "    A3_EMAIL, "     + CRLF
+	cQryPed += "    L1_VLRLIQ, "    + CRLF
+	cQryPed += "    L1_TPFRET, "    + CRLF
+	cQryPed += "    L1_FRETE, "     + CRLF
+	cQryPed += "    L1_PBRUTO, "    + CRLF
+	cQryPed += "    L1_MENNOTA, "   + CRLF
+	cQryPed += "    L1_DESCONT, "   + CRLF
+	cQryPed += "    L1_VALMERC, "   + CRLF
 	cQryPed += "    SL1.R_E_C_N_O_ AS L1REC "                    + CRLF
 	cQryPed += " FROM "                                          + CRLF
 	cQryPed += "    "+RetSQLName("SL1")+" SL1 "                  + CRLF
@@ -223,7 +234,7 @@ Static Function fMontaRel(oProc)
 			//Inicializa os calculos de impostos
 			nItAtu   := 0
 			nTotIte  := 0
-			nTotalST := 0
+			nVSTTot  := 0
 			nTotIPI  := 0
 			SL1->(DbGoTo(QRY_PED->L1REC))
 			MaFisIni(SL1->L1_CLIENTE,;                   // 01 - Codigo Cliente/Fornecedor
@@ -241,7 +252,7 @@ Static Function fMontaRel(oProc)
 			cQryIte := " SELECT "                                                 + CRLF
 			cQryIte += "    L2_PRODUTO, "                                         + CRLF
 			cQryIte += "    L2_CODBAR, "                                          + CRLF
-			cQryIte += "    ISNULL(B1_DESC, '') AS B1_DESC, "                     + CRLF
+			cQryIte += "    B1_DESC, "						                      + CRLF
 			cQryIte += "    L2_UM, "                                              + CRLF
 			cQryIte += "    L2_SEGUM, "                                           + CRLF
 			cQryIte += "    L2_ENTREGA, "                                         + CRLF
@@ -255,8 +266,8 @@ Static Function fMontaRel(oProc)
 			cQryIte += "    L2_SERIE, "                                           + CRLF
 			cQryIte += "    L2_VLRITEM, "                                         + CRLF
 			cQryIte += "    L2_VALIPI, "                                          + CRLF
-			cQryIte += "    L2_VALDESC, "                                         + CRLF
-			cQryIte += "    SB5.B5_QE1 "                                          + CRLF 
+			cQryIte += "    L2_ICMSRET, "                                         + CRLF
+			cQryIte += "    L2_VALDESC "                                          + CRLF
 			cQryIte += " FROM "                                                   + CRLF
 			cQryIte += "    "+RetSQLName("SL2")+" SL2 "                           + CRLF
 			cQryIte += "    LEFT JOIN "+RetSQLName("SB1")+" SB1 ON ( "            + CRLF
@@ -264,16 +275,6 @@ Static Function fMontaRel(oProc)
 			cQryIte += "        AND B1_COD = SL2.L2_PRODUTO "                     + CRLF
 			cQryIte += "        AND SB1.D_E_L_E_T_ = ' ' "                        + CRLF
 			cQryIte += "    ) "                                                   + CRLF
-			cQryIte += "    LEFT JOIN " + RetSqlName("SB5") + " SB5"              + CRLF
-			cQryIte += "           on SB5.D_E_L_E_T_ <> '*'"                      + CRLF
-			cQryIte += "          and SB5.B5_FILIAL = '" + FWxFilial("SB5") + "'" + CRLF
-			cQryIte += "          and SB5.B5_COD    = SL2.L2_PRODUTO"             + CRLF
-			cQryIte += "    LEFT JOIN " + RetSqlName("DA1") + " DA1"              + CRLF
-			cQryIte += "          on DA1.D_E_L_E_T_ <> '*'"                       + CRLF
-			cQryIte += "         and DA1.DA1_FILIAL = '" + FWxFilial("DA1") + "'" + CRLF
-			cQryIte += "         and DA1.DA1_CODTAB = '" + QRY_PED->L1_TABELA+"'" + CRLF
-			cQryIte += "         and DA1.DA1_ATIVO  = '1'"                        + CRLF
-			cQryIte += "         and DA1.DA1_CODPRO = SL2.L2_PRODUTO"             + CRLF
 			cQryIte += " WHERE "                                                  + CRLF
 			cQryIte += "    L2_FILIAL = '"+FWxFilial("SL2")+"' "                  + CRLF
 			cQryIte += "    AND L2_NUM = '"+QRY_PED->L1_NUM+"' "                  + CRLF
@@ -299,26 +300,25 @@ Static Function fMontaRel(oProc)
 			QRY_ITE->(DbGoTop())
 
 			nItAtu   := 0
-			nTotDesc := QRY_PED->L1_DESCONT
 
 			While ! QRY_ITE->(EoF())
 				nItAtu++
 				oProc:IncRegua2("Imprimindo item "+cValToChar(nItAtu)+" de "+cValToChar(nTotIte)+"...")
 				
-				nQdt2UM  := Calc2UM(QRY_ITE->L2_PRODUTO)
 				nQdtTot  += QRY_ITE->L2_QUANT
-				nVUnTot  += QRY_ITE->L2_PRCTAB
-				nQdtTot2 += nQdt2UM
-				nPacTot  += QRY_ITE->L2_QUANT / QRY_ITE->B5_QE1
+				nVUnTot  += QRY_ITE->L2_PRCTAB + (QRY_ITE->L2_VALIPI / QRY_ITE->L2_QUANT)
+				nVSTTot  += QRY_ITE->L2_ICMSRET
+				nDescont += QRY_ITE->L2_VALDESC
 				nIPITot  += QRY_ITE->L2_VALIPI
-			
-				nValorTot += (QRY_ITE->L2_PRCTAB * QRY_ITE->L2_QUANT) + QRY_ITE->L2_VALIPI
-				nTotDesc  += QRY_ITE->L2_VALDESC
+				nValorTot += ((QRY_ITE->L2_PRCTAB * QRY_ITE->L2_QUANT) + QRY_ITE->L2_ICMSRET + QRY_ITE->L2_VALIPI) - QRY_ITE->L2_VALDESC
 
-				oPrintPvt:SayAlign(nLinAtu, nPosCod,   Alltrim(QRY_ITE->L2_PRODUTO),                      oFontDet, 200, 07, , nPadLeft,)
-				oPrintPvt:SayAlign(nLinAtu, nPosDesc,  Alltrim(QRY_ITE->B1_DESC),                         oFontDet, 300, 07, , nPadLeft,)
-				oPrintPvt:SayAlign(nLinAtu, nPosUnid,  QRY_ITE->L2_UM,                                    oFontDet, 100, 07, , nPadLeft,)
-				oPrintPvt:SayAlign(nLinAtu, nPosQuan,  Alltrim(Transform(QRY_ITE->L2_QUANT, cMaskQtd)),   oFontDet, 100, 07, , nPadLeft,)
+				nVUnit   := QRY_ITE->L2_PRCTAB + (QRY_ITE->L2_VALIPI / QRY_ITE->L2_QUANT)
+				nVlrItem := ((QRY_ITE->L2_PRCTAB * QRY_ITE->L2_QUANT) + QRY_ITE->L2_ICMSRET + QRY_ITE->L2_VALIPI) - QRY_ITE->L2_VALDESC
+
+				oPrintPvt:SayAlign(nLinAtu, nPosCod,   Alltrim(QRY_ITE->L2_PRODUTO),                      	oFontDet, 200, 07, , nPadLeft,)
+				oPrintPvt:SayAlign(nLinAtu, nPosDesc,  SubStr(Alltrim(QRY_ITE->B1_DESC),1,40),             	oFontDet, 300, 07, , nPadLeft,)
+				oPrintPvt:SayAlign(nLinAtu, nPosUnid,  QRY_ITE->L2_UM,                                    	oFontDet, 100, 07, , nPadLeft,)
+				oPrintPvt:SayAlign(nLinAtu, nPosQuan,  Alltrim(Transform(QRY_ITE->L2_QUANT, cMaskQtd)),   	oFontDet, 100, 07, , nPadLeft,)
 				nLinAtu += 10
 
 				//Se por acaso atingiu o limite da Pagina, finaliza, e começa uma nova Pagina
@@ -334,7 +334,6 @@ Static Function fMontaRel(oProc)
 			nTotDesp  := MaFisRet(, "NF_DESPESA")
 			nTotVal   := MaFisRet(, "NF_TOTAL")
 
-			fMontDupl()
 			QRY_ITE->(DbCloseArea())
 			MaFisEnd()
 			
@@ -417,16 +416,22 @@ Static Function fImpCab()
 	oPrintPvt:SayAlign(nLinCab, nColIni+453,  "Nº Orçamento:",                          oFontCabN, 200, 07, , nPadLeft, )
 	nLinCab += 010
 	oPrintPvt:SayAlign(nLinCab, nColIni+470, QRY_PED->L1_NUM,                           oFontCab,  200, 07, , nPadLeft, )
+	nLinCab += 015
 	
-	If SL1->(FieldPos("L1_XTIPO")) > 0
-		nLinCab += 015
-		cTipoOrc := IIF(SL1->L1_XTIPO == 'V', "V - Venda", "O - Orçamento")
-		oPrintPvt:SayAlign(nLinCab, nColIni+453,  "Tipo: ",      			            oFontCabN, 200, 07, , nPadLeft, )
-		oPrintPvt:SayAlign(nLinCab, nColIni+475, cTipoOrc,                        		oFontCab,  200, 07, , nPadLeft, )
-		nLinCab += 015
-	 Else 
-		nLinCab := (nLinCab + 030)
-	EndIf 
+	DbSelectArea("SL2")
+	IF SL2->(MsSeek(xFilial("SL2")+SL1->L1_NUM))
+	Do Case
+		Case SL2->L2_ENTREGA $("1/4")
+			cTipoOrc := "Retira Posterior"
+		Case SL2->L2_ENTREGA $("3/5")
+			cTipoOrc := "Entrega"
+		Case SL2->L2_ENTREGA == "2"
+			cTipoOrc := "Retira"
+	EndCase
+	oPrintPvt:SayAlign(nLinCab, nColIni+453,  "Tipo: ",      			            oFontCabN, 200, 07, , nPadLeft, )
+	oPrintPvt:SayAlign(nLinCab, nColIni+475, cTipoOrc,                        		oFontCab,  200, 07, , nPadLeft, )
+	EndIF 
+	nLinCab += 015
 	
 	oPrintPvt:Line(nLinCab, nColIni+450, nLinCab, nColFin)
 	oPrintPvt:SayAlign(nLinCab, nColIni+453,  "Dt.Emissao:",                            oFontCabN, 200, 07, , nPadLeft, )
@@ -482,7 +487,7 @@ Static Function fImpCab()
 	oPrintPvt:Line(nLinCab, nColIni, nLinCab, nColFin)
 	nLinCab += 005
 	oPrintPvt:SayAlign(nLinCab, nColIni+5, "Vendedor:",                                     oFontCabN, 200, 07, , nPadLeft, )
-	oPrintPvt:SayAlign(nLinCab, nColIni+50, QRY_PED->L1_VEND + " - "+QRY_PED->A3_NOME,      oFontCab,  500, 07, , nPadLeft, )
+	oPrintPvt:SayAlign(nLinCab, nColIni+50, QRY_PED->L1_VEND + " - "+QRY_PED->A3_NREDUZ,    oFontCab,  500, 07, , nPadLeft, )
 	nLinCab += 010
 	oPrintPvt:SayAlign(nLinCab, nColIni+5, "Telefone:",	                                    oFontCabN, 200, 07, , nPadLeft, )
 	oPrintPvt:SayAlign(nLinCab, nColIni+043,Alltrim(QRY_PED->A3_DDDTEL)+" "+;
@@ -498,10 +503,11 @@ Static Function fImpCab()
 	nLinCab += 002
 	oPrintPvt:Line(nLinCab, nColIni, nLinCab, nColFin)
 	nLinCab += 002
-	oPrintPvt:SayAlign(nLinCab, nPosCod,   "Código", 	oFontDetN, 200, 07,, nPadLeft,)
-	oPrintPvt:SayAlign(nLinCab, nPosDesc,  "Descricao", oFontDetN, 200, 07,, nPadLeft,)
-	oPrintPvt:SayAlign(nLinCab, nPosUnid,  "UM",        oFontDetN, 200, 07,, nPadLeft,)
-	oPrintPvt:SayAlign(nLinCab, nPosQuan,  "Qtd.", 	    oFontDetN, 200, 07,, nPadLeft,)
+	oPrintPvt:SayAlign(nLinCab, nPosCod,   "Código", 		oFontDetN, 200, 07,, nPadLeft,)
+	oPrintPvt:SayAlign(nLinCab, nPosDesc,  "Descricao", 	oFontDetN, 200, 07,, nPadLeft,)
+	oPrintPvt:SayAlign(nLinCab, nPosUnid,  "UM",    		oFontDetN, 200, 07,, nPadLeft,)
+	oPrintPvt:SayAlign(nLinCab, nPosQuan,  "Qtd.", 			oFontDetN, 200, 07,, nPadLeft,)
+	
 	//Atualizando a linha inicial do relatorio
 	nLinAtu := nLinCab + 020
 Return
@@ -579,7 +585,6 @@ Return cLogo
  *---------------------------------------------------------------------*/
 
 Static Function fImpTot()
-
 	nLinAtu += 4
 	
 	//Se atingir o fim da Pagina, quebra
@@ -590,41 +595,6 @@ Static Function fImpTot()
 	
     oPrintPvt:SayAlign(nLinAtu, nPosVTot-60, "Total a Pagar:", oFontCabN, 200, 07, , nPadLeft, )
 	oPrintPvt:SayAlign(nLinAtu, nPosVTot, 	 Alltrim(Transform(nValorTot - nTotDesc, cMaskVlr)),oFontCabN, 080, 07, , nPadLeft, )
-Return
-
-/*---------------------------------------------------------------------*
- | Func:  fMontDupl                                                    |
- | Desc:  Função que monta o array de duplicatas                       |
- *---------------------------------------------------------------------*/
-
-Static Function fMontDupl()
-	Local aArea := GetArea()
-	Local cQry  := ""
-	
-	aDuplicatas := {}
-
-	cQry := " SELECT "                                  + CRLF
-	cQry += "    L4_DATA, L4_VALOR, L4_FORMA, L4_TROCO" + CRLF
-	cQry += " FROM "                                    + CRLF
-	cQry += "    "+RetSQLName("SL4")+" SL4 "            + CRLF
-	cQry += " WHERE "                                   + CRLF
-	cQry += "    L4_FILIAL   = '"+FWxFilial("SL4")+"' " + CRLF
-	cQry += "    AND L4_NUM  = '"+cPedido+"' "          + CRLF
-	cQry += "    AND D_E_L_E_T_ = ' ' "                 + CRLF
-
-	TCQuery cQry New Alias "QRY_SL4"
-
-		IF !Empty(SL1->L1_CREDITO)
-			AAdd( aDuplicatas, {dDataBase, (SL1->L1_CREDITO),"CR"})
-		EndIF
-
-		While ! QRY_SL4->(EoF())
-			AAdd( aDuplicatas, {SToD(QRY_SL4->L4_DATA), (QRY_SL4->L4_VALOR - QRY_SL4->L4_TROCO),Alltrim(QRY_SL4->L4_FORMA)})	
-		 QRY_SL4->(dbSkip())
-		Enddo
-
-	QRY_SL4->(DbCloseArea())
-	RestArea(aArea)
 Return
 
 /*---------------------------------------------------------------------*
@@ -640,11 +610,8 @@ Static Function fImpDupl()
 	Local nLinLim 		:= nLinAtu + ((nLinhas+1)*7) + nTamFundo
 	Local nColAux 		:= nColIni
 	Local aParcelas     := {}
-	Local nPosCC        := 0
-	Local nPosFI        := 0
-	Local nPosBO        := 0
-	Local nPosBOL       := 0
-	Local nPosCA        := 0
+	Local cQry          := ""
+	Local _cAlias       := GetNextAlias()
 	nLinAtu += 020
 	
 	//Se atingir o fim da Pagina, quebra
@@ -660,59 +627,33 @@ Static Function fImpDupl()
 	nLinAtu += 005
 	nLinDup := nLinAtu
 
-	For nAtual := 1 To Len(aDuplicatas)
-		nPosCC  := aScan(aParcelas, {|x| AllTrim(x[4]) == "CC"})
-		nPosFI  := aScan(aParcelas, {|x| AllTrim(x[4]) == "FI"})
-		nPosBO  := aScan(aParcelas, {|x| AllTrim(x[4]) == "BO"})
-		nPosBOL := aScan(aParcelas, {|x| AllTrim(x[4]) == "BOL"})
-		nPosCA  := aScan(aParcelas, {|x| AllTrim(x[4]) == "CA"})
-		
-		IF Empty(nPosCC) .And. aDuplicatas[nAtual][3] == "CC"
-			aAdd(aParcelas,{1,AllTrim(FWGetSX5("24","CC","pt-br")[1,4]),aDuplicatas[nAtual][2],aDuplicatas[nAtual][3]})
-		ElseIF AllTrim(aDuplicatas[nAtual][3]) == "CC"
-			aParcelas[nPosCC][1] += 1
-			aParcelas[nPosCC][3] += aDuplicatas[nAtual][2]
-		EndIF 
-
-		IF Empty(nPosFI) .And. aDuplicatas[nAtual][3] == "FI"
-			aAdd(aParcelas,{1,"BOLETO",aDuplicatas[nAtual][2],aDuplicatas[nAtual][3]})
-		ElseIF AllTrim(aDuplicatas[nAtual][3]) == "FI"
-			aParcelas[nPosFI][1] += 1
-			aParcelas[nPosFI][1] += aDuplicatas[nAtual][2]
-		EndIF
-
-		IF Empty(nPosBO) .And. aDuplicatas[nAtual][3] == "BO"
-			aAdd(aParcelas,{1,AllTrim(FWGetSX5("24","BO","pt-br")[1,4]),aDuplicatas[nAtual][2],aDuplicatas[nAtual][3]})
-		ElseIF AllTrim(aDuplicatas[nAtual][3]) == "BO"
-			aParcelas[nPosBO][1] += 1
-			aParcelas[nPosBO][1] += aDuplicatas[nAtual][2]
-		EndIF
-
-		IF Empty(nPosBOL) .And. aDuplicatas[nAtual][3] == "BOL"
-			aAdd(aParcelas,{1,AllTrim(FWGetSX5("24","BOL","pt-br")[1,4]),aDuplicatas[nAtual][2],aDuplicatas[nAtual][3]})
-		ElseIF AllTrim(aDuplicatas[nAtual][3]) == "BOL"
-			aParcelas[nPosBOL][1] += 1
-			aParcelas[nPosBOL][1] += aDuplicatas[nAtual][2]
-		EndIF
-
-		IF Empty(nPosCA) .And. aDuplicatas[nAtual][3] == "CA"
-			aAdd(aParcelas,{1,AllTrim(FWGetSX5("24","CA","pt-br")[1,4]),aDuplicatas[nAtual][2],aDuplicatas[nAtual][3]})
-		ElseIF AllTrim(aDuplicatas[nAtual][3]) == "CA"
-			aParcelas[nPosCA][1] += 1
-			aParcelas[nPosCA][1] += aDuplicatas[nAtual][2]
-		EndIF
-
-		IF !(aDuplicatas[nAtual][3] $("CC/FI/BO/BOL/CA"))
-			aAdd(aParcelas,{0,AllTrim(FWGetSX5("24",aDuplicatas[nAtual][3],"pt-br")[1,4]),aDuplicatas[nAtual][2],aDuplicatas[nAtual][3]})
-		EndIF
-	Next 
+	cQry := " SELECT L4_FORMA, SUM(L4_VALOR) AS VALOR, COUNT(L4_FORMA) AS QTD FROM " + RetSQLName('SL4') 
+    cQry += " WHERE D_E_L_E_T_ <> '*' "
+    cQry += "   AND L4_FILIAL = '" +xFilial("SL4")+"'"
+    cQry += "   AND L4_NUM = '" +SL1->L1_NUM+"'"
+    cQry += " GROUP BY L4_FORMA"
+    cQry := ChangeQuery(cQry)
+    IF Select(_cAlias) <> 0
+        (_cAlias)->(DbCloseArea())
+    EndIf
+    dbUseArea(.T.,"TOPCONN",TcGenQry(,,cQry),_cAlias,.T.,.T.) 
+    While (_cAlias)->(!Eof())
+        IF (_cAlias)->QTD == 1
+            aAdd(aParcelas,{ "R$ " + AllTrim(AllToChar((_cAlias)->VALOR, "@E 9,999,999,999,999.99")) + " - " ;
+                             + Upper(AllTrim(FWGetSX5("24",AllTrim((_cAlias)->(L4_FORMA)),"pt-br")[1,4])) })
+        Else
+            aAdd(aParcelas,{ "R$ " + AllTrim(AllToChar((_cAlias)->VALOR, "@E 9,999,999,999,999.99")) + " - " ;
+                             + Upper(AllTrim(FWGetSX5("24",AllTrim((_cAlias)->(L4_FORMA)),"pt-br")[1,4])) + " em " + cValToChar((_cAlias)->QTD) + "X" })
+        EndIF 
+    (_cAlias)->(DBSkip())
+    End
+    IF Select(_cAlias) <> 0
+        (_cAlias)->(DbCloseArea())
+    EndIf
 
 	//Percorre as duplicatas
 	For nAtual := 1 To Len(aParcelas)
-		oPrintPvt:SayAlign(nLinDup, nColAux+0005, StrZero(nAtual, 2)+" - "+;
-									"R$ "+ Alltrim(Transform(aParcelas[nAtual][3], cMaskVlr)) +;
-									IIF(!Empty(aParcelas[nAtual][1])," em "+ cValToChar(aParcelas[nAtual][1])+"X no "," em ") +;
-									aParcelas[nAtual][2],	oFontCab,  500, 07, , nPadLeft, )
+		oPrintPvt:SayAlign(nLinDup, nColAux+0005, StrZero(nAtual, 2)+" - "+ aParcelas[nAtual][1],	oFontCab,  500, 07, , nPadLeft, )
 		nLinDup += 7
 		nLinDupAux += 5
 
@@ -772,7 +713,7 @@ Local nId       := 0
 	Next nId
 	nLinAtu += 010
 
-	oPrintPvt:SayAlign(nLinAtu, nColIni, "Orçamento válido por "+cValToChar(nValidade)+" dias. Validade: "+cDtValid,    oFontObsN,  540, 07, , nPadCenter, )
+	oPrintPvt:SayAlign(nLinAtu, nColIni, "Orçamento válido até: "+cDtValid,    oFontObsN,  540, 07, , nPadCenter, )
 	nLinAtu += 010
 	oPrintPvt:SayAlign(nLinAtu, nColIni, "Este orçamento não pode ser alterado. Qualquer alteração que seja realizada neste documento",    	oFontObs,  540, 07, , nPadCenter, )
 	nLinAtu += 010
@@ -792,41 +733,3 @@ Local nId       := 0
 
 	oPrintPvt:SayAlign(nLinAtu, nColIni, cCGC,  oFontCabN,  540, 07, , nPadCenter, )
 Return
-
-/*---------------------------------------------------------------------*
- | Func:  Calc2UM                                                      |
- | Desc:  Calcula a quantidade da Segunda Unidade de Medida            |
- *---------------------------------------------------------------------*/
-
-Static Function Calc2UM(cProduto)
-	Local aAreaSB1 := GetArea()
-	Local cQry     := ""
-
-	cQry := " SELECT "                                         + CRLF
-	cQry += "    B1_COD, B1_SEGUM, B1_CONV, B1_TIPCONV"        + CRLF
-	cQry += " FROM "                                           + CRLF
-	cQry += "    "+RetSQLName("SB1")+" SB1 "                   + CRLF
-	cQry += " WHERE "                                          + CRLF
-	cQry += "    SB1.B1_FILIAL   = '"+FWxFilial("SB1")+"' "    + CRLF
-	cQry += "    AND SB1.B1_COD  = '"+cProduto+"' "            + CRLF
-	cQry += "    AND SB1.D_E_L_E_T_  <> '*' "                  + CRLF
-
-	TCQuery cQry New Alias "QRYTMP_SB1"
-
-	If !Empty(QRYTMP_SB1->B1_COD)
-		
-		nQdt2UM := 0
-
-		If QRYTMP_SB1->B1_TIPCONV == "M"
-			nQdt2UM := QRY_ITE->L2_QUANT * QRYTMP_SB1->B1_CONV
-		 ElseIf QRYTMP_SB1->B1_TIPCONV == "D"
-			nQdt2UM := QRY_ITE->L2_QUANT / QRYTMP_SB1->B1_CONV
-		 ElseIf Empty(QRYTMP_SB1->B1_TIPCONV)
-		 	nQdt2UM := QRY_ITE->L2_QUANT
-		EndIf 
-	
-	EndIf 
-
-	QRYTMP_SB1->(DbCloseArea())
-	RestArea(aAreaSB1)
-Return nQdt2UM
