@@ -360,17 +360,15 @@ Funcao para alimentar o array com os produtos do tipo Retira
 /*/
 //-------------------------------------------------------------------
 Static Function fPrdMadFerr()
-	Local cGrpProd := ""
-
-	aAdd(aPrdMaFe,{})
-	aAdd(aPrdMaFe,{})
+	Local nPosFil := 0
+	Local nPosArr := 0
+	Local nY, nX
 
 	dbSelectArea("SL2")
 	dbSetOrder(1)  
 	dbSeek(xFilial("SL2") + nOrcam)
 	
-	dbSelectArea("ACV")
-	ACV->(dbSetOrder(4))
+	dbSelectArea("SB1")
 
 	While !SL2->(Eof()) .AND. SL2->L2_FILIAL + SL2->L2_NUM == xFilial("SL2") + nOrcam
 		/* Entrega ou Retira Posterior ou Vale Presente*/	
@@ -378,22 +376,42 @@ Static Function fPrdMadFerr()
 			.OR. (Posicione("SB1",1,xFilial("SB1") + SL2->L2_PRODUTO,"SB1->B1_TIPO") == cServType) ;
 			.OR. (Posicione("SB1",1,xFilial("SB1") + SL2->L2_PRODUTO,"SB1->B1_TIPO") == cGarType)
 			
-			cGrpProd := Posicione("SB1",1,xFilial("SB1") + SL2->L2_PRODUTO,"SB1->B1_GRUPO")
+			nPosFil := 0
 
-			IF ACV->(MSSeek(xFilial("ACV")+cGrpProd))
-				/*
-				Do Case
-					Case ACV->ACV_CATEGO == '000001'
-						aAdd(aPrdMaFe[1],{ SL2->L2_ITEM, SL2->L2_PRODUTO })
-					Case ACV->ACV_CATEGO == '000002'
-						aAdd(aPrdMaFe[2],{ SL2->L2_ITEM, SL2->L2_PRODUTO })
-				End Case
-				*/
-				aAdd(aPrdMaFe[1],{ SL2->L2_ITEM, SL2->L2_PRODUTO })
+			For nY := 1 To Len(aPrdMaFe)
+				IF Empty(nPosFil)
+					For nX := 1 To Len(aPrdMaFe[nY])
+						IF Empty(nPosFil)
+							nPosFil := aScan(aPrdMaFe[nY,nX], {|x| AllTrim(x[3]) == AllTrim(SL2->L2_LOJARES)})
+						Else
+							Exit	
+						EndIF 
+					Next nX
+				Else
+					Exit
+				EndIF
+			Next nY
+
+			If Empty(nPosFil)
+				aAdd(aPrdMaFe,{{},{}})
+				nPosArr := Len(aPrdMaFe)
+				IF SB1->(MSSeek(xFilial("SB1")+SL2->L2_PRODUTO))
+					IF AllTrim(SB1->B1_XTPPROD) == "M" //Madeira
+						aAdd(aPrdMaFe[nPosArr,1],{ SL2->L2_ITEM, SL2->L2_PRODUTO, SL2->L2_LOJARES,"M"})
+					Else
+						aAdd(aPrdMaFe[nPosArr,2],{ SL2->L2_ITEM, SL2->L2_PRODUTO, SL2->L2_LOJARES,"D"})
+					EndIF 
+				EndIF
 			Else
-				aAdd(aPrdMaFe[2],{ SL2->L2_ITEM, SL2->L2_PRODUTO })
+				IF SB1->(MSSeek(xFilial("SB1")+SL2->L2_PRODUTO))
+					IF AllTrim(SB1->B1_XTPPROD) == "M" //Madeira
+						aAdd(aPrdMaFe[nPosFil,1],{ SL2->L2_ITEM, SL2->L2_PRODUTO, SL2->L2_LOJARES,"M"})
+					Else
+						aAdd(aPrdMaFe[nPosFil,2],{ SL2->L2_ITEM, SL2->L2_PRODUTO, SL2->L2_LOJARES,"D"})
+					EndIF 
+				EndIF
 			EndIF 
-	
+
 			SL2->(DbSkip())
 		Else
 			SL2->(DbSkip())
@@ -414,205 +432,240 @@ Funcao para impressao do comprovante de Retira
 /*/
 //-------------------------------------------------------------------
 Static Function fCompRet(pPos)
-	Local cComprov := IIF(pPos == 1, 'MADEIRA', 'DIVERSOS')
+	Local cComprov := ""
 	Local cMsg     := ""
 	Local nLinMsg  := 0
-	Local nY       := 0
+	Local cEmpRes  := ""
+	Local cFilRes  := ""
+	Local aSM0Ret  := {}
+	Local cNomComR := "" // Nome Comercial da Empresa
+	Local cEndEntR := "" // Endereço de Entrega
+	Local cBaiEntR := "" // Bairro de Entrega
+	Local cCidEntR := "" // Cidade de Entrega
+	Local cEstEntR := "" // Estado de Entrega
+	Local cCepEntR := "" // Cep de Entrega
+	Local cCgcEntR := "" // CNPJ 
+	Local cInsEntR := "" // Inscrição Estadual
+	Local nY, nX
 
-	sTexto:= '<ce>'+ alltrim(cNomCom) +'</ce>'+ Chr(13)+ Chr(10)
-	sTexto:= sTexto +'<ce>'+ alltrim(cEndEnt) + ' - '+ alltrim(cBaiEnt) +'</ce>'+ Chr(13)+ Chr(10)
-	sTexto:= sTexto +'<ce>'+ alltrim(cCidEnt) + ' - '+ alltrim(cEstEnt) + ' CEP:'+ alltrim(cCepEnt) +'</ce>'+ Chr(13)+ Chr(10)
-	sTexto:= sTexto +'<ce> CNPJ: '+ alltrim(cCgcEnt) + ' IE: '+ alltrim(cInsEnt) +'</ce>'+ Chr(13)+ Chr(10)
+	DBSelectArea("SLJ")
 
-	sTexto:= sTexto + Replicate("-", nMaxChar)						   		+ Chr(13)+ Chr(10)
-	sTexto:= sTexto + '<b><ce>COMPROVANTE DE RETIRADA '+cComprov+'</ce></b>' 	+ Chr(13)+ Chr(10)
-	sTexto:= sTexto + Replicate("-", nMaxChar)						   		+ Chr(13)+ Chr(10)
-	sTexto:= sTexto + 'Codigo         Descricao' 					   		+ Chr(13)+ Chr(10)
-	sTexto:= sTexto + 'Qtd            VlrUnit              VlrTot'    		+ Chr(13)+ Chr(10)
-	sTexto:= sTexto + Replicate("-", nMaxChar)						   		+ Chr(13)+ Chr(10)
-	dbSelectArea("SL1")                                                                  
-	dbSetOrder(1)  
-	dbSeek(xFilial("SL1") + nOrcam)
-
-	//nTroco		:= Iif(SL1->(FieldPos("L1_TROCO1")) > 0,(nFatorRes * SL1->L1_TROCO1), 0)
-	//nDinheir	:= (nFatorRes * SL1->L1_DINHEIR)
-	//nCheques	:= (nFatorRes * SL1->L1_CHEQUES)
-	//nCartaoC 	:= (nFatorRes * SL1->L1_CARTAO)
-	//nCartaoD 	:= (nFatorRes * SL1->L1_VLRDEBI)
-	//nConveni	:= (nFatorRes * SL1->L1_CONVENI)
-	//nVales  	:= (nFatorRes * SL1->L1_VALES)  	
-	//nCredito	:= (nFatorRes * SL1->L1_CREDITO)  	
-	//nFinanc		:= (nFatorRes * SL1->L1_FINANC)
-	//nOutros		:= (nFatorRes * SL1->L1_OUTROS)
-	nValTot		:= 0
-	nDescTot	:= 0
-	nVlrDescIt  := 0
-	nTotDesc    := 0
-
-	/* Soma o valor de todas as formas de pagamento
-	Necessariio dar um round em cada forma para verificar se ha diferença de arredondamento no somatorio dos pagamentos*/
-	nValPag :=	Round(nDinheir,2)	+	Round(nCheques,2)	+	Round(nCartaoC,2)	+	Round(nCartaoD,2)	+;
-				Round(nConveni,2)	+	Round(nVales,2)	+	Round(nCredito,2)	+	Round(nFinanc,2)	+;
-				Round(nOutros,2) + Round(nPIX,2) + Round(nCartDig,2) + Round(nCarteir,2) + Round(nDeposit,2) + Round(nPIXManu,2)
-
-	dbSelectArea("SL2")
-	dbSetOrder(1)  
+	For nX := 1 To Len(aPrdMaFe[pPos])
 		
-	For nY := 1 To Len(aPrdMaFe[pPos])
-		
-		dbSeek(xFilial("SL2") + nOrcam + aPrdMaFe[pPos,nY,1] + aPrdMaFe[pPos,nY,2])
+		If !Empty(aPrdMaFe[pPos,nX])
+			IF SLJ->(MSSeek(xFilial("SLJ") + aPrdMaFe[pPos,nX,1,3] ))
+				cEmpRes := SLJ->LJ_RPCEMP
+				cFilRes := SLJ->LJ_RPCFIL
+			EndIF
+			
+			aSM0Ret  := FWSM0Util():GetSM0Data( cEmpRes, cFilRes, aFieldSM0)
+			cNomComR := aSM0Ret[1,2]
+			cEndEntR := aSM0Ret[2,2]
+			cBaiEntR := aSM0Ret[3,2]
+			cCidEntR := aSM0Ret[4,2]
+			cEstEntR := aSM0Ret[5,2]
+			cCepEntR := aSM0Ret[6,2]
+			cCgcEntR := aSM0Ret[7,2]
+			cInsEntR := aSM0Ret[8,2]
 
-		If SL2->L2_ENTREGA $("3|5")
-			lPedido := .T.
-		EndIf
-		
-		If aScan(aProdGarantia, { |p| RTrim(p[1]) ==  RTRim(SL2->L2_PRODUTO)} ) > 0
-			cGarantia := "*"
-		Else
-			If SL2->(FieldPos("L2_GARANT")) > 0 .AND.  !Empty(SL2->L2_GARANT)
-				cGarantia := "#"
-			Else
-				cGarantia := ""
+			cComprov := IIF(aPrdMaFe[pPos,nX,1,4] == "M", 'MADEIRA', 'DIVERSOS')
+				
+			sTexto:= '<ce>'+ alltrim(cNomComR) +'</ce>'+ Chr(13)+ Chr(10)
+			sTexto:= sTexto +'<ce>'+ alltrim(cEndEntR) + ' - '+ alltrim(cBaiEntR) +'</ce>'+ Chr(13)+ Chr(10)
+			sTexto:= sTexto +'<ce>'+ alltrim(cCidEntR) + ' - '+ alltrim(cEstEntR) + ' CEP:'+ alltrim(cCepEntR) +'</ce>'+ Chr(13)+ Chr(10)
+			sTexto:= sTexto +'<ce> CNPJ: '+ alltrim(cCgcEntR) + ' IE: '+ alltrim(cInsEntR) +'</ce>'+ Chr(13)+ Chr(10)
+
+			sTexto:= sTexto + Replicate("-", nMaxChar)						   		+ Chr(13)+ Chr(10)
+			sTexto:= sTexto + '<b><ce>COMPROVANTE DE RETIRADA '+cComprov+'</ce></b>' 	+ Chr(13)+ Chr(10)
+			sTexto:= sTexto + Replicate("-", nMaxChar)						   		+ Chr(13)+ Chr(10)
+			sTexto:= sTexto + 'Codigo         Descricao' 					   		+ Chr(13)+ Chr(10)
+			sTexto:= sTexto + 'Qtd            VlrUnit              VlrTot'    		+ Chr(13)+ Chr(10)
+			sTexto:= sTexto + Replicate("-", nMaxChar)						   		+ Chr(13)+ Chr(10)
+			dbSelectArea("SL1")                                                                  
+			dbSetOrder(1)  
+			dbSeek(xFilial("SL1") + nOrcam)
+
+			//nTroco	:= Iif(SL1->(FieldPos("L1_TROCO1")) > 0,(nFatorRes * SL1->L1_TROCO1), 0)
+			//nDinheir	:= (nFatorRes * SL1->L1_DINHEIR)
+			//nCheques	:= (nFatorRes * SL1->L1_CHEQUES)
+			//nCartaoC 	:= (nFatorRes * SL1->L1_CARTAO)
+			//nCartaoD 	:= (nFatorRes * SL1->L1_VLRDEBI)
+			//nConveni	:= (nFatorRes * SL1->L1_CONVENI)
+			//nVales  	:= (nFatorRes * SL1->L1_VALES)  	
+			//nCredito	:= (nFatorRes * SL1->L1_CREDITO)  	
+			//nFinanc	:= (nFatorRes * SL1->L1_FINANC)
+			//nOutros	:= (nFatorRes * SL1->L1_OUTROS)
+			nValTot		:= 0
+			nDescTot	:= 0
+			nVlrDescIt  := 0
+			nTotDesc    := 0
+
+			/* Soma o valor de todas as formas de pagamento
+			Necessariio dar um round em cada forma para verificar se ha diferença de arredondamento no somatorio dos pagamentos*/
+			nValPag :=	Round(nDinheir,2)	+	Round(nCheques,2)	+	Round(nCartaoC,2)	+	Round(nCartaoD,2)	+;
+						Round(nConveni,2)	+	Round(nVales,2)	+	Round(nCredito,2)	+	Round(nFinanc,2)	+;
+						Round(nOutros,2) + Round(nPIX,2) + Round(nCartDig,2) + Round(nCarteir,2) + Round(nDeposit,2) + Round(nPIXManu,2)
+			
+			dbSelectArea("SL2")
+			dbSetOrder(1)  
+
+			For nY := 1 To Len(aPrdMaFe[pPos,nX])
+
+				dbSeek(xFilial("SL2") + nOrcam + aPrdMaFe[pPos,nX,nY,1] + aPrdMaFe[pPos,nX,nY,2])
+
+				If SL2->L2_ENTREGA $("3|5")
+					lPedido := .T.
+				EndIf
+
+				If aScan(aProdGarantia, { |p| RTrim(p[1]) ==  RTRim(SL2->L2_PRODUTO)} ) > 0
+					cGarantia := "*"
+				Else
+					If SL2->(FieldPos("L2_GARANT")) > 0 .AND.  !Empty(SL2->L2_GARANT)
+						cGarantia := "#"
+					Else
+						cGarantia := ""
+					EndIf
+				EndIf
+
+				If !Empty(SL2->L2_ENTREGA)
+					If !Empty(cGarantia)
+						cGarantia += IIF(SL2->L2_ENTREGA == "3", " E", IIF(SL2->L2_ENTREGA == "1", " P", ""))
+					Else
+						cGarantia := IIF(SL2->L2_ENTREGA == "3", "E", IIF(SL2->L2_ENTREGA == "1", "P", ""))
+					EndIf
+
+				EndIf
+
+				//Faz o tratamento do valor do ICMS ret.
+				If SL2->(FieldPos("L2_ICMSRET")) > 0
+					nVlrIcmsRet	:= SL2->L2_ICMSRET
+				Endif
+
+				cQuant 	:= Alltrim(Transform(SL2->L2_QUANT, "@E 999,999,999.99"))
+
+				If (!lMvGarFP .AND. !lLibQtdGE ) .AND. (cGarantia == "*" .OR. (Posicione("SB1",1,xFilial("SB1")+SL2->L2_PRODUTO, "B1_TIPO") == SuperGetMV("MV_LJTPGAR",,"GE")))
+					cVrUnit	:= Str(((SL2->L2_QUANT * SL2->L2_VLRITEM) + SL2->L2_VALIPI + nVlrIcmsRet) / SL2->L2_QUANT, 15, 2)
+				Else
+					//cVrUnit	:= Str(((SL2->L2_QUANT * SL2->L2_PRCTAB) + SL2->L2_VALIPI + nVlrIcmsRet) / SL2->L2_QUANT, 15, 2)
+					cVrUnit	:= AllToChar(((SL2->L2_VLRITEM + SL2->L2_VALIPI + nVlrIcmsRet) / SL2->L2_QUANT),PesqPict("SL2","L2_VLRITEM"))
+				EndIf
+
+				//Valor de desconto no item
+				nVlrDescIt += SL2->L2_VALDESC
+				nTotDesc   += SL2->L2_DESCPRO
+				cVrUnit    := StrTran(cVrUnit,".","")
+				cVrUnit    := StrTran(cVrUnit,",",".")
+				cVlrItem   := Str(Val(cVrUnit) * SL2->L2_QUANT, 15, 2)
+				sTexto	   := sTexto + PadR( Alltrim(SL2->L2_PRODUTO) + ' - ' + Alltrim(SL2->L2_DESCRI) ,nMaxChar) + Chr(13) + Chr(10)
+				sTexto	   := sTexto + '<b>'+cQuant + '  ' + cVrUnit + '      ' + cVlrItem +'</b>'+ Chr(13) + Chr(10)
+				If SL2->L2_VALDESC > 0
+					sTexto	:= sTexto + 'Desconto no Item: ' + Str(SL2->L2_VALDESC, 15, 2) + Chr(13) + Chr(10)
+				EndIf
+				If !Empty(SL2->L2_LOCALIZ)
+					sTexto	:= sTexto + '<b>Endereço:</b> ' + Alltrim(SL2->L2_LOCALIZ) + Chr(13) + Chr(10)
+				EndIf
+
+				nValTot  += Val(cVlrItem)
+
+			Next nY                  
+
+			cDesconto	:= Str(nVlrDescIt, TamSx3("L2_VALDESC")[1], TamSx3("L2_VALDESC")[2])
+			nVlrFSD		:= SL1->L1_FRETE + SL1->L1_SEGURO + SL1->L1_DESPESA
+
+			If SL1->L1_DESCONTO > 0
+				//O valor de desconto deve ser encontrada atraves da soma de todos os produtos (seus valores originais) (sem frete / sem desconto / sem acrescimo)
+				//Porem quando é selecionado a NCC para pagamento os valores vem um pouco diferentes.
+				If SL1->L1_CREDITO > 0 
+					nDescTot	:= SL1->L1_DESCONT * (  (nValTot-nVlrDescIt) / (SL1->L1_VALBRUT - nVlrFSD + SL1->L1_DESCONT))
+				Else
+					nDescTot	:= nTotDesc
+				EndIf 
+
+				sTexto	:= sTexto + 'Desconto no Total:             ' + Str(nDescTot, 15, 2) + Chr(13) + Chr(10)
 			EndIf
-		EndIf
-	
-		If !Empty(SL2->L2_ENTREGA)
-			If !Empty(cGarantia)
-				cGarantia += IIF(SL2->L2_ENTREGA == "3", " E", IIF(SL2->L2_ENTREGA == "1", " P", ""))
+
+			//Armazena Valor Total
+			If lMvArrefat
+				//nVlrTot := Round((nValTot - nDescTot - nVlrDescIt + nTroco), TamSX3("D2_TOTAL")[2])
+				nVlrTot := Round((nValTot + nTroco), TamSX3("D2_TOTAL")[2])
 			Else
-				cGarantia := IIF(SL2->L2_ENTREGA == "3", "E", IIF(SL2->L2_ENTREGA == "1", "P", ""))
+				//nVlrTot := NoRound((nValTot - nDescTot - nVlrDescIt + nTroco), TamSX3("D2_TOTAL")[2])
+				nVlrTot := NoRound((nValTot + nTroco), TamSX3("D2_TOTAL")[2])
 			EndIf
-	
-		EndIf
-		
-		//Faz o tratamento do valor do ICMS ret.
-		If SL2->(FieldPos("L2_ICMSRET")) > 0
-			nVlrIcmsRet	:= SL2->L2_ICMSRET
-		Endif
-		
-		cQuant 	:= Alltrim(Transform(SL2->L2_QUANT, "@E 999,999,999.99"))
-	
-		If (!lMvGarFP .AND. !lLibQtdGE ) .AND. (cGarantia == "*" .OR. (Posicione("SB1",1,xFilial("SB1")+SL2->L2_PRODUTO, "B1_TIPO") == SuperGetMV("MV_LJTPGAR",,"GE")))
-			cVrUnit	:= Str(((SL2->L2_QUANT * SL2->L2_VLRITEM) + SL2->L2_VALIPI + nVlrIcmsRet) / SL2->L2_QUANT, 15, 2)
-		Else
-			//cVrUnit	:= Str(((SL2->L2_QUANT * SL2->L2_PRCTAB) + SL2->L2_VALIPI + nVlrIcmsRet) / SL2->L2_QUANT, 15, 2)
-			cVrUnit	:= AllToChar(((SL2->L2_VLRITEM + SL2->L2_VALIPI + nVlrIcmsRet) / SL2->L2_QUANT),PesqPict("SL2","L2_VLRITEM"))
-		EndIf
-		
-		//Valor de desconto no item
-		nVlrDescIt += SL2->L2_VALDESC
-		nTotDesc   += SL2->L2_DESCPRO
-		cVrUnit    := StrTran(cVrUnit,".","")
-		cVrUnit    := StrTran(cVrUnit,",",".")
-		cVlrItem   := Str(Val(cVrUnit) * SL2->L2_QUANT, 15, 2)
-		sTexto	   := sTexto + PadR( Alltrim(SL2->L2_PRODUTO) + ' - ' + Alltrim(SL2->L2_DESCRI) ,nMaxChar) + Chr(13) + Chr(10)
-		sTexto	   := sTexto + '<b>'+cQuant + '  ' + cVrUnit + '      ' + cVlrItem +'</b>'+ Chr(13) + Chr(10)
-		If SL2->L2_VALDESC > 0
-			sTexto	:= sTexto + 'Desconto no Item: ' + Str(SL2->L2_VALDESC, 15, 2) + Chr(13) + Chr(10)
-		EndIf
-		If !Empty(SL2->L2_LOCALIZ)
-			sTexto	:= sTexto + '<b>Endereço:</b> ' + Alltrim(SL2->L2_LOCALIZ) + Chr(13) + Chr(10)
-		EndIf
-		
-		nValTot  += Val(cVlrItem)
-	
-	Next                  
 
-	cDesconto	:= Str(nVlrDescIt, TamSx3("L2_VALDESC")[1], TamSx3("L2_VALDESC")[2])
-	nVlrFSD		:= SL1->L1_FRETE + SL1->L1_SEGURO + SL1->L1_DESPESA
+			//Calcula juros
+			If SL1->L1_JUROS > 0    
+				If nMvLjTpDes <> 2
+					nVlrAcres := NoRound((nVlrTot * SL1->L1_JUROS) / 100, TamSx3("D2_VALACRS")[2])    
+				Else
+					nVlrAcres := Round((nVlrTot * SL1->L1_JUROS) / 100, TamSx3("D2_VALACRS")[2]) 
+				EndIf
 
-	If SL1->L1_DESCONTO > 0
-		//O valor de desconto deve ser encontrada atraves da soma de todos os produtos (seus valores originais) (sem frete / sem desconto / sem acrescimo)
-		//Porem quando é selecionado a NCC para pagamento os valores vem um pouco diferentes.
-		If SL1->L1_CREDITO > 0 
-			nDescTot	:= SL1->L1_DESCONT * (  (nValTot-nVlrDescIt) / (SL1->L1_VALBRUT - nVlrFSD + SL1->L1_DESCONT))
-		Else
-			nDescTot	:= nTotDesc
-		EndIf 
-		
-		sTexto	:= sTexto + 'Desconto no Total:             ' + Str(nDescTot, 15, 2) + Chr(13) + Chr(10)
-	EndIf
+				nVlrTot   += nVlrAcres //Adiciona acrescimo no valor total
+				sTexto    := sTexto + 'Acrescimo no Total:            ' + Transform(SL1->L1_JUROS, "@R 99.99%") + Chr(13) + Chr(10)
+			EndIf
 
-	//Armazena Valor Total
-	If lMvArrefat
-		//nVlrTot := Round((nValTot - nDescTot - nVlrDescIt + nTroco), TamSX3("D2_TOTAL")[2])
-		nVlrTot := Round((nValTot + nTroco), TamSX3("D2_TOTAL")[2])
-	Else
-		//nVlrTot := NoRound((nValTot - nDescTot - nVlrDescIt + nTroco), TamSX3("D2_TOTAL")[2])
-		nVlrTot := NoRound((nValTot + nTroco), TamSX3("D2_TOTAL")[2])
-	EndIf
+			//Adiciona frete somente quando existe um item com pedido na venda
+			If nVlrFSD > 0 .And. lPedido
+				nVlrTot += nVlrFSD
+			EndIf
 
-	//Calcula juros
-	If SL1->L1_JUROS > 0    
-		If nMvLjTpDes <> 2
-			nVlrAcres := NoRound((nVlrTot * SL1->L1_JUROS) / 100, TamSx3("D2_VALACRS")[2])    
-		Else
-			nVlrAcres := Round((nVlrTot * SL1->L1_JUROS) / 100, TamSx3("D2_VALACRS")[2]) 
-		EndIf
-		
-		nVlrTot   += nVlrAcres //Adiciona acrescimo no valor total
-		sTexto    := sTexto + 'Acrescimo no Total:            ' + Transform(SL1->L1_JUROS, "@R 99.99%") + Chr(13) + Chr(10)
-	EndIf
+			/* Ajusta o valor proporcionalizado na condição de pagamento em $
+			Necessario para evitar diferença de 0,01 centavos em determinados casos de venda mista*/
+			If nDinheir > 0
+				If nValPag <> nVlrTot
+					// Ajusto o valor em dinheiro para impressão no comprovante não fiscal		
+					nDinheir := nDinheir + Round(nValTot + nVlrFSD - nDescTot - nVlrDescIt + nTroco + nVlrAcres,2) - nValPag
+				EndIf	            
+			EndIf
 
-	//Adiciona frete somente quando existe um item com pedido na venda
-	If nVlrFSD > 0 .And. lPedido
-		nVlrTot += nVlrFSD
-	EndIf
+			If nVlrFSD > 0 .And. lPedido
+				sTexto	:= sTexto + 'Frete:                         ' + Transform(nVlrFSD, PesqPict("SL1","L1_FRETE")) + Chr(13) + Chr(10)
+			EndIf
 
-	/* Ajusta o valor proporcionalizado na condição de pagamento em $
-	Necessario para evitar diferença de 0,01 centavos em determinados casos de venda mista*/
-	If nDinheir > 0
-		If nValPag <> nVlrTot
-			// Ajusto o valor em dinheiro para impressão no comprovante não fiscal		
-			nDinheir := nDinheir + Round(nValTot + nVlrFSD - nDescTot - nVlrDescIt + nTroco + nVlrAcres,2) - nValPag
-		EndIf	            
-	EndIf
-																		
-	If nVlrFSD > 0 .And. lPedido
-		sTexto	:= sTexto + 'Frete:                         ' + Transform(nVlrFSD, PesqPict("SL1","L1_FRETE")) + Chr(13) + Chr(10)
-	EndIf
+			sTexto := sTexto + Replicate("-", nMaxChar)						     + Chr(13) + Chr(10)
+			sTexto	:= sTexto + 'TOTAL                          ' + Str(nVlrTot, 15, 2) + Chr(13) + Chr(10)
 
-	sTexto := sTexto + Replicate("-", nMaxChar)						     + Chr(13) + Chr(10)
-	sTexto	:= sTexto + 'TOTAL                          ' + Str(nVlrTot, 15, 2) + Chr(13) + Chr(10)
-	
-	sTexto := sTexto + '<b>Orc. Res.: </b>' + AllTrim(SL1->L1_NUM) + Chr(13) + Chr(10)
-	sTexto := sTexto + ' ' + Chr(13) + Chr(10)
-	sTexto := sTexto + '<b>Cliente:</b> ' +  AllTrim(SL1->L1_CLIENTE) + "-" + Alltrim(cNomCli)    + Chr(13) + Chr(10)
-	sTexto := sTexto + Replicate("-", nMaxChar)						     + Chr(13) + Chr(10) 
+			sTexto := sTexto + '<b>Orc. Res.: </b>' + AllTrim(SL1->L1_NUM) + Chr(13) + Chr(10)
+			sTexto := sTexto + ' ' + Chr(13) + Chr(10)
+			sTexto := sTexto + '<b>Cliente:</b> ' +  AllTrim(SL1->L1_CLIENTE) + "-" + Alltrim(cNomCli)    + Chr(13) + Chr(10)
 
-	sTexto := sTexto + '<b>Data:</b> ' + DtoC(dDatabase) + ' <b>Hora: </b>' +Time() + Chr(13) + Chr(10)
-	sTexto := sTexto + '<b>Vendedor:</b> ' + Alltrim(SL1->L1_VEND)+' - ' +  Alltrim(cNomVen) + Chr(13) + Chr(10)
-	sTexto := sTexto + '<b>Caixa:</b> ' + Alltrim(SL1->L1_ESTACAO)+'<b> Operador: </b>' + Alltrim(SL1->L1_OPERADO)+' - ' +  Alltrim(cNomOpe) + Chr(13) + Chr(10)
-	sTexto := sTexto + Replicate("-", nMaxChar)						     + Chr(13) + Chr(10)
-	sTexto := sTexto + ' ' + Chr(13) + Chr(10)
+			sTexto := sTexto + Replicate("-", nMaxChar)						     + Chr(13) + Chr(10) 
 
-	If !Empty(SL1->L1_XMSGI)
-		cMsg    := SL1->L1_XMSGI
-		nLinMsg := MLCount(SL1->L1_XMSGI,nMaxChar)
+			sTexto := sTexto + '<b>Data:</b> ' + DtoC(dDatabase) + ' <b>Hora: </b>' +Time() + Chr(13) + Chr(10)
+			sTexto := sTexto + '<b>Vendedor:</b> ' + Alltrim(SL1->L1_VEND)+' - ' +  Alltrim(cNomVen) + Chr(13) + Chr(10)
+			sTexto := sTexto + '<b>Caixa:</b> ' + Alltrim(SL1->L1_ESTACAO)+'<b> Operador: </b>' + Alltrim(SL1->L1_OPERADO)+' - ' +  Alltrim(cNomOpe) + Chr(13) + Chr(10)
+			sTexto := sTexto + Replicate("-", nMaxChar)						     + Chr(13) + Chr(10)
+			sTexto := sTexto + ' ' + Chr(13) + Chr(10)
 
-		For nY := 1 To nLinMsg
-			sTexto := sTexto + '<ce>' + MemoLine(cMsg,nMaxChar,nY) + '</ce>' + Chr(13) + Chr(10)
-		Next nY
-		
-		sTexto := sTexto + ' ' + Chr(13) + Chr(10)
-	EndIf
+			If !Empty(SL1->L1_XMSGI)
+				cMsg    := SL1->L1_XMSGI
+				nLinMsg := MLCount(SL1->L1_XMSGI,nMaxChar)
 
-	sTexto := sTexto + '<ce>' + 'Prezado(a) Cliente informamos que o prazo ' + '</ce>' + Chr(13) + Chr(10)
-	sTexto := sTexto + '<ce>' + 'para retirada da mercadoria é de 15 dias ' + '</ce>' + Chr(13) + Chr(10)
-	sTexto := sTexto + '<ce>' + 'a partir do fechamento da venda.' + '</ce>' + Chr(13) + Chr(10)
-	
-	sTexto := sTexto + Replicate("-", nMaxChar)						     + Chr(13) + Chr(10)
+				For nY := 1 To nLinMsg
+					sTexto := sTexto + '<ce>' + MemoLine(cMsg,nMaxChar,nY) + '</ce>' + Chr(13) + Chr(10)
+				Next nY
 
-	sTexto := sTexto + '<ce>' + 'Prezado(a) Cliente gostaríamos de informar ' + '</ce>' + Chr(13) + Chr(10)
-	sTexto := sTexto + '<ce>' + 'que o prazo para devolução é de 30 dias ' + '</ce>' + Chr(13) + Chr(10)
-	sTexto := sTexto + '<ce>' + 'a partir da data de recebimento do produto. ' + '</ce>' + Chr(13) + Chr(10)
-	sTexto := sTexto + ' ' + Chr(13) + Chr(10)
-	sTexto := sTexto + '<ce>' + 'Agradecemos pela sua atenção! ' + '</ce>' + Chr(13) + Chr(10)
+				sTexto := sTexto + ' ' + Chr(13) + Chr(10)
+			EndIf
 
-	sTexto := sTexto + Replicate("-", nMaxChar)						     + Chr(13) + Chr(10)
+			sTexto := sTexto + '<ce>' + 'Prezado(a) Cliente informamos que o prazo ' + '</ce>' + Chr(13) + Chr(10)
+			sTexto := sTexto + '<ce>' + 'para retirada da mercadoria é de 15 dias ' + '</ce>' + Chr(13) + Chr(10)
+			sTexto := sTexto + '<ce>' + 'a partir do fechamento da venda.' + '</ce>' + Chr(13) + Chr(10)
 
-	cTxImp := StrTran( sTexto, ',', '.' )
-	STWManagReportPrint(cTxImp,1) //Envia comando para a Impressora
+			sTexto := sTexto + Replicate("-", nMaxChar)						     + Chr(13) + Chr(10)
+
+			sTexto := sTexto + '<ce>' + 'O prazo para devolução é de 30 dias ' + '</ce>' + Chr(13) + Chr(10)
+			sTexto := sTexto + '<ce>' + 'a partir da data de recebimento do produto. ' + '</ce>' + Chr(13) + Chr(10)
+			sTexto := sTexto + ' ' + Chr(13) + Chr(10)
+			sTexto := sTexto + '<ce>' + 'Agradecemos pela sua atenção! ' + '</ce>' + Chr(13) + Chr(10)
+
+			sTexto := sTexto + Replicate("-", nMaxChar)						     + Chr(13) + Chr(10)
+
+			cTxImp := StrTran( sTexto, ',', '.' )
+			STWManagReportPrint(cTxImp,1) //Envia comando para a Impressora
+		EndIF
+	Next nX 
 
 	sTexto := '.'
 
@@ -640,7 +693,7 @@ nLin:= 0                // Contador de Linhas
 aDriver:=ReadDriver()
 If aReturn[5]==2
 	
-	nOpc       := 1
+	nOpc := 1
 	While .T.
 		
 		SetPrc(0,0)
