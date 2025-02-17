@@ -47,7 +47,6 @@ Static cMaskCPF   := "@R 999.999.999-99"                //Mascara de CPF
 Static cMaskQtd   := "@E 99,999,999,999.99"             //Mascara de quantidade
 Static cMaskPrc   := "@E 99,999,999,999.99"             //Mascara de preço
 Static cMaskVlr   := "@E 99,999,999,999.99"             //Mascara de valor
-Static cMaskFrete := PesqPict("SL1", "L1_FRETE")        //Mascara de frete
 
 /*/{Protheus.doc} zROrcComp
 impressao Grafica generica de Orçamento de Venda (em pdf)
@@ -99,12 +98,12 @@ Static Function fLayout()
 	nPosCod   := 0010 // Codigo do Produto
 	nPosDesc  := 0060 // Descricao
 	nPosUnid  := 0240 // 1ª Unidade de Medida 
-	nPosQuan  := 0280 // Quantidade 1ª UM
-	nPosVUni  := 0320 // Valor Unitario 1ª UM
-	nPosVDes  := 0370 // Valor do Desconto
-	nPosVlIP  := 0420 // Valor ICMS ST
-	nPosVlST  := 0470 // Valor ICMS ST
-	nPosVTot  := 0520 // Valor Total
+	nPosQuan  := 0250 // Quantidade 1ª UM
+	nPosVUni  := 0300 // Valor Unitario 1ª UM
+	nPosVDes  := 0350 // Valor do Desconto
+	nPosVlIP  := 0400 // Valor ICMS ST
+	nPosVlST  := 0440 // Valor ICMS ST
+	nPosVTot  := 0490 // Valor Total
 Return
 
 /*---------------------------------------------------------------------*
@@ -596,7 +595,6 @@ Return cLogo
  *---------------------------------------------------------------------*/
 
 Static Function fImpTot()
-	Local cFretePed  := ""
 	Local nTotAPagar := 0
 
 	nLinAtu += 10
@@ -618,32 +616,16 @@ Static Function fImpTot()
 	nLinAtu += 015
 
 	oPrintPvt:SayAlign(nLinAtu, nPosVTot-60, "Frete:", oFontCabN, 200, 07, , nPadLeft, )
+	oPrintPvt:SayAlign(nLinAtu, nPosVTot, 	 Alltrim(Transform(SL1->L1_FRETE, cMaskVlr)), oFontCab, 200, 07, , nPadLeft, )
 
-    Do Case
-	   Case QRY_PED->L1_TPFRET == "C"
-		    cFretePed := "CIF"
-
-	   Case QRY_PED->L1_TPFRET == "F"
-		    cFretePed := "FOB"
-
-	   Case QRY_PED->L1_TPFRET == "T"
-		    cFretePed := "Terceiros"
-	
-	   Otherwise
-		    cFretePed := "Sem Frete"
-	EndCase
-
-	cFretePed += " - " + Alltrim(Transform(QRY_PED->L1_FRETE, cMaskFrete))
-	oPrintPvt:SayAlign(nLinAtu, nPosVTot, cFretePed, oFontCab, 200,07,, nPadLeft,)
-
-    nLinAtu += 10
+    nLinAtu += 15
 
 	oPrintPvt:SayAlign(nLinAtu, nPosVTot-60, "Desconto:", oFontCabN, 200, 07, , nPadLeft, )
 	oPrintPvt:SayAlign(nLinAtu, nPosVTot, 	 Alltrim(Transform(SL1->L1_DESCONT, cMaskVlr)), oFontCab, 200, 07, , nPadLeft, )
 
 	nLinAtu += 15
 
-    oPrintPvt:Line(nLinAtu, nPosVTot, nLinAtu, nPosVTot + 60)
+    oPrintPvt:Line(nLinAtu, nPosVTot, nLinAtu, nPosVTot + 30)
 
     nLinAtu += 05
 	

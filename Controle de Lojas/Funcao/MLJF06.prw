@@ -82,7 +82,7 @@ Static Function ModelDef()
   oModel:AddGrid('T2DETAIL', 'T1MASTER', oStrTMP2,/*bLinePre*/, /*bLinePost*/,/*bPre - Grid Inteiro*/,/*bPos - Grid Inteiro*/,/*bLoad - Carga do modelo manualmente*/)
 
   oModel:SetPrimaryKey({})
-  oModel:SetDescription("Historico Cliente")
+  oModel:SetDescription("Crédito Cliente")
   oModel:GetModel('T1MASTER'):SetDescription('Dados do Cliente')
   oModel:GetModel('T2DETAIL'):SetDescription('Creditos Correntista')
 

@@ -594,7 +594,7 @@ Static Function fImpTot()
 	EndIf
 	
     oPrintPvt:SayAlign(nLinAtu, nPosVTot-60, "Total a Pagar:", oFontCabN, 200, 07, , nPadLeft, )
-	oPrintPvt:SayAlign(nLinAtu, nPosVTot, 	 Alltrim(Transform(nValorTot - nTotDesc, cMaskVlr)),oFontCabN, 080, 07, , nPadLeft, )
+	oPrintPvt:SayAlign(nLinAtu, nPosVTot, 	 Alltrim(Transform(nValorTot, cMaskVlr)),oFontCabN, 080, 07, , nPadLeft, )
 Return
 
 /*---------------------------------------------------------------------*
