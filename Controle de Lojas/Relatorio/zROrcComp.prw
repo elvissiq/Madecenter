@@ -96,9 +96,9 @@ Static Function fLayout()
 	oFontObsN  := TFont():New(cNomeFont, , -11, , .T.)
 
 	nPosCod   := 0010 // Codigo do Produto
-	nPosDesc  := 0060 // Descricao
+	nPosDesc  := 0040 // Descricao
 	nPosUnid  := 0240 // 1ª Unidade de Medida 
-	nPosQuan  := 0250 // Quantidade 1ª UM
+	nPosQuan  := 0260 // Quantidade 1ª UM
 	nPosVUni  := 0300 // Valor Unitario 1ª UM
 	nPosVDes  := 0350 // Valor do Desconto
 	nPosVlIP  := 0400 // Valor ICMS ST
@@ -234,8 +234,8 @@ Static Function fMontaRel(oProc)
 			//Inicializa os calculos de impostos
 			nItAtu   := 0
 			nTotIte  := 0
-			nVSTTot  := 0
 			nTotIPI  := 0
+			nVSTTot  := 0
 			SL1->(DbGoTo(QRY_PED->L1REC))
 			MaFisIni(SL1->L1_CLIENTE,;                   // 01 - Codigo Cliente/Fornecedor
 				SL1->L1_LOJA,;                           // 02 - Loja do Cliente/Fornecedor
@@ -307,6 +307,7 @@ Static Function fMontaRel(oProc)
 				
 				nQdtTot  += QRY_ITE->L2_QUANT
 				nVUnTot  += QRY_ITE->L2_PRCTAB + (QRY_ITE->L2_VALIPI / QRY_ITE->L2_QUANT)
+				nTotIPI  += QRY_ITE->L2_VALIPI
 				nVSTTot  += QRY_ITE->L2_ICMSRET
 				nDescont += QRY_ITE->L2_VALDESC
 				nIPITot  += QRY_ITE->L2_VALIPI
@@ -606,9 +607,10 @@ Static Function fImpTot()
 	EndIf
 
 	//Cria o grupo de Total
-	oPrintPvt:SayAlign(nLinAtu - 1, nPosUnid - 10, "Totais:  ", 				  oFontTit , 080, 07, nCorAzul, nPadLeft, )
+	oPrintPvt:SayAlign(nLinAtu - 1, nPosUnid - 20, "Totais:  ", 				  oFontTit , 080, 07, nCorAzul, nPadLeft, )
 	oPrintPvt:SayAlign(nLinAtu, nPosQuan, Alltrim(Transform(nQdtTot, cMaskQtd)),  oFontCabN, 080, 07, , nPadLeft, )
 	oPrintPvt:SayAlign(nLinAtu, nPosVUni, Alltrim(Transform(nVUnTot, cMaskPrc)),  oFontCabN, 080, 07, , nPadLeft, )
+	oPrintPvt:SayAlign(nLinAtu, nPosVlIP, Alltrim(Transform(nTotIPI, cMaskPrc)),  oFontCabN, 080, 07, , nPadLeft, )
 	oPrintPvt:SayAlign(nLinAtu, nPosVlST, Alltrim(Transform(nVSTTot, cMaskPrc)),  oFontCabN, 080, 07, , nPadLeft, )
 	oPrintPvt:SayAlign(nLinAtu, nPosVDes, Alltrim(Transform(nDescont, cMaskPrc)), oFontCabN, 080, 07, , nPadLeft, )
 	oPrintPvt:SayAlign(nLinAtu, nPosVTot, Alltrim(Transform(nValorTot, cMaskVlr)),oFontCabN, 080, 07, , nPadLeft, )

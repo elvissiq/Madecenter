@@ -97,12 +97,8 @@ Static Function fLayout()
 
 	nPosCod   := 0010 // Codigo do Produto
 	nPosDesc  := 0060 // Descricao
-	nPosUnid  := 0240 // 1ª Unidade de Medida 
-	nPosQuan  := 0280 // Quantidade 1ª UM
-	nPosVUni  := 0320 // Valor Unitario 1ª UM
-	nPosVDes  := 0370 // Valor do Desconto
-	nPosVlIP  := 0420 // Valor ICMS ST
-	nPosVlST  := 0470 // Valor ICMS ST
+	nPosUnid  := 0280 // 1ª Unidade de Medida 
+	nPosQuan  := 0320 // Quantidade 1ª UM
 	nPosVTot  := 0520 // Valor Total
 Return
 
