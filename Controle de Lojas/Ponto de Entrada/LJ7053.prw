@@ -15,7 +15,8 @@ User Function LJ7053()
         aSubI1 := {{ "Confirmar Entrega" , "U_MLJF03"	,0,1}} 
         
 
-        aSubI2 := {{ "Liberar Quantidade", "U_MLJF08"	,0,3},;
+        aSubI2 := {{ "Mapa de Separação", "U_MCLOJR01"	,0,3},;
+                   { "Liberar Quantidade", "U_MLJF08"	,0,3},;
         	   { "Gerar Nota Fiscal", "U_MLJF08"	,0,3},; 
             	   { "NF-e Sefaz", "SPEDNFE"	        ,0,3},; 
                	   { "Nota Fiscal Servico", "FISA022"	,0,3}}	
