@@ -1,7 +1,7 @@
-#INCLUDE "RWMAKE.CH" 
+#INCLUDE "RWMAKE.CH"
 
 Static nL1Credit := 0
-User Function SCRPED()   
+User Function SCRPED() 
 
 	Local aArea 			:= FWGetArea()
 	Local aAreaSL1 			:= SL1->(FWGetArea())
@@ -561,10 +561,11 @@ Static Function fCompRet(pPos)
 				If SL2->L2_VALDESC > 0
 					sTexto	:= sTexto + 'Desconto no Item: ' + Str(SL2->L2_VALDESC, 15, 2) + Chr(13) + Chr(10)
 				EndIf
+				/*
 				If !Empty(SL2->L2_LOCALIZ)
 					sTexto	:= sTexto + '<b>Endereço:</b> ' + Alltrim(SL2->L2_LOCALIZ) + Chr(13) + Chr(10)
 				EndIf
-
+				*/
 				nValTot  += Val(cVlrItem)
 
 			Next nY                  
@@ -858,10 +859,12 @@ Static Function SCRPRetPgt()
 							{"PI",0},;	// 13
 							{"OUTRO",0}} // 14
 
-	IF ValType(nL1Credit) == "N"
-		IF !Empty(nL1Credit) //Variavel nL1Credit esta contida no fonte STIMPSALE.prw
-			aVlrFormas[10][02] += nL1Credit
-			nL1Credit := 0
+	IF IsInCallStack("STIPOSMAIN")
+		IF ValType(nL1Credit) == "N"
+			IF !Empty(nL1Credit) //Variavel nL1Credit esta contida no fonte STIMPSALE.prw
+				aVlrFormas[10][02] += nL1Credit
+				nL1Credit := 0
+			EndIF
 		EndIF
 	EndIF
 

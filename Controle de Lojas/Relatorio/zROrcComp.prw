@@ -96,7 +96,7 @@ Static Function fLayout()
 	oFontObsN  := TFont():New(cNomeFont, , -11, , .T.)
 
 	nPosCod   := 0010 // Codigo do Produto
-	nPosDesc  := 0040 // Descricao
+	nPosDesc  := 0050 // Descricao
 	nPosUnid  := 0240 // 1ª Unidade de Medida 
 	nPosQuan  := 0260 // Quantidade 1ª UM
 	nPosVUni  := 0300 // Valor Unitario 1ª UM
@@ -317,7 +317,7 @@ Static Function fMontaRel(oProc)
 				nVlrItem := ((QRY_ITE->L2_PRCTAB * QRY_ITE->L2_QUANT) + QRY_ITE->L2_ICMSRET + QRY_ITE->L2_VALIPI) - QRY_ITE->L2_VALDESC
 
 				oPrintPvt:SayAlign(nLinAtu, nPosCod,   Alltrim(QRY_ITE->L2_PRODUTO),                      	oFontDet, 200, 07, , nPadLeft,)
-				oPrintPvt:SayAlign(nLinAtu, nPosDesc,  SubStr(Alltrim(QRY_ITE->B1_DESC),1,40),             	oFontDet, 300, 07, , nPadLeft,)
+				oPrintPvt:SayAlign(nLinAtu, nPosDesc,  SubStr(Alltrim(QRY_ITE->B1_DESC),1,35),             	oFontDet, 300, 07, , nPadLeft,)
 				oPrintPvt:SayAlign(nLinAtu, nPosUnid,  QRY_ITE->L2_UM,                                    	oFontDet, 100, 07, , nPadLeft,)
 				oPrintPvt:SayAlign(nLinAtu, nPosQuan,  Alltrim(Transform(QRY_ITE->L2_QUANT, cMaskQtd)),   	oFontDet, 100, 07, , nPadLeft,)
 				oPrintPvt:SayAlign(nLinAtu, nPosVUni,  Alltrim(Transform(nVUnit, cMaskPrc)),  			  	oFontDet, 100, 07, , nPadLeft,)

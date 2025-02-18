@@ -173,7 +173,8 @@ Static Function fnGrvOP()
 	aAdd(aVetorOP, {'C2_DATPRF' , SToD((_cAlias)->L2_EMISSAO)              		, Nil} )
 	aAdd(aVetorOP, {'C2_EMISSAO', SToD((_cAlias)->L2_EMISSAO)              		, Nil} )
 	aAdd(aVetorOP, {'C2_OBS'    , 'OP Gerada aut. Orc.: '+ (_cAlias)->L2_NUM 	, Nil} )
-	aAdd(aVetorOP, {'AUTEXPLODE', 'S'                        					        , Nil} )
+  aAdd(aVetorOP, {'C2_XL1NUM' , (_cAlias)->L2_NUM 	                        , Nil} )
+  aAdd(aVetorOP, {'AUTEXPLODE', 'S'                        					        , Nil} )
 
   lMsErroAuto:= .F. 
   MSExecAuto({|x, y| MATA650(x, y)}, aVetorOP, 3)
